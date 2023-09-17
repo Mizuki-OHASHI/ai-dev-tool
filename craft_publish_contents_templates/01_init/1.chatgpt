@@ -1,0 +1,176 @@
+Sure, I can help you generate Go code for the DAO, controller, and converter related to the PublishContentsTemplates model and API. Below is the code for each of these components:
+
+dao/publish_contents_templates.go
+```go
+package dao
+
+import (
+	"context"
+	"time"
+
+	"github.com/your-package/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type PublishContentsTemplatesDAO struct {
+	collection *mongo.Collection
+}
+
+func NewPublishContentsTemplatesDAO(collection *mongo.Collection) *PublishContentsTemplatesDAO {
+	return &PublishContentsTemplatesDAO{
+		collection: collection,
+	}
+}
+
+func (dao *PublishContentsTemplatesDAO) GetByID(ctx context.Context, id string) (*model.PublishContentsTemplates, error) {
+	var result model.PublishContentsTemplates
+	err := dao.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (dao *PublishContentsTemplatesDAO) Create(ctx context.Context, data *model.PublishContentsTemplates) (*model.PublishContentsTemplates, error) {
+	data.CreatedAt = time.Now()
+	data.UpdatedAt = time.Now()
+	_, err := dao.collection.InsertOne(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (dao *PublishContentsTemplatesDAO) Update(ctx context.Context, id string, data *model.PublishContentsTemplates) (*model.PublishContentsTemplates, error) {
+	data.UpdatedAt = time.Now()
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": data}
+	_, err := dao.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (dao *PublishContentsTemplatesDAO) Delete(ctx context.Context, id string) error {
+	filter := bson.M{"_id": id}
+	_, err := dao.collection.DeleteOne(ctx, filter)
+	return err
+}
+
+// Add other DAO methods as needed
+```
+
+controller/publishcontentstemplates/controller.go
+```go
+package controller
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/your-package/dao"
+	"github.com/your-package/model"
+)
+
+type PublishContentsTemplatesController struct {
+	dao *dao.PublishContentsTemplatesDAO
+}
+
+func NewPublishContentsTemplatesController(dao *dao.PublishContentsTemplatesDAO) *PublishContentsTemplatesController {
+	return &PublishContentsTemplatesController{
+		dao: dao,
+	}
+}
+
+func (c *PublishContentsTemplatesController) GetByID(ctx *gin.Context) {
+	id := ctx.Param("id")
+	data, err := c.dao.GetByID(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, data)
+}
+
+func (c *PublishContentsTemplatesController) Create(ctx *gin.Context) {
+	var request model.PublishContentsTemplatesBody
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	data := &model.PublishContentsTemplates{
+		DisplayName: request.DisplayName,
+		Channel:     request.Channel,
+		Contents:    request.Contents,
+		Remarks:     request.Remarks,
+		Tags:        request.Tags,
+	}
+
+	createdData, err := c.dao.Create(ctx, data)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusCreated, createdData)
+}
+
+func (c *PublishContentsTemplatesController) Update(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var request model.PublishContentsTemplatesBody
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	data := &model.PublishContentsTemplates{
+		DisplayName: request.DisplayName,
+		Channel:     request.Channel,
+		Contents:    request.Contents,
+		Remarks:     request.Remarks,
+		Tags:        request.Tags,
+	}
+
+	updatedData, err := c.dao.Update(ctx, id, data)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, updatedData)
+}
+
+func (c *PublishContentsTemplatesController) Delete(ctx *gin.Context) {
+	id := ctx.Param("id")
+	err := c.dao.Delete(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// Add other controller methods as needed
+```
+
+controller/publishcontentstemplates/converter.go
+```go
+package controller
+
+import (
+	"github.com/your-package/model"
+)
+
+// Convert PublishContentsTemplates to JSON response format
+func ConvertToPublishContentsTemplatesResponse(data *model.PublishContentsTemplates) *model.PublishContentsTemplates {
+	return data
+}
+
+// Convert PublishContentsTemplatesList to JSON response format
+func ConvertToPublishContentsTemplatesListResponse(data model.PublishContentsTemplatesList) model.PublishContentsTemplatesList {
+	return data
+}
+Please replace your-package with your actual Go package name where necessary. This code provides a basic structure for your DAO, controller, and converter for the PublishContentsTemplates model and API. You can further expand and customize these components based on your specific requirements.
+```
