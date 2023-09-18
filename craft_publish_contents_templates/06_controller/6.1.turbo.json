@@ -1,0 +1,21 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "```go\nfunc (c *publishcontentstemplates) DeleteCraftV1PublishContentsTemplatesId(ctx *gin.Context, s1 string) {\n\ttenantID := ctx.GetHeader(\"Tenant-ID\")\n\n\terr := c.u.Delete(ctx, tenantID, s1)\n\tif err != nil {\n\t\tlogger.Error(err)\n\t\tcommon.SendErrorResponse(ctx, http.StatusInternalServerError, \"Failed to delete publish contents templates\")\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, gin.H{\n\t\t\"message\": \"Publish contents templates deleted successfully\",\n\t})\n}\n```",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1695002018,
+  "id": "chatcmpl-7zxkAibQ4DkZUPIdVcWswbW5nFGTE",
+  "model": "gpt-3.5-turbo-0613",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 110,
+    "prompt_tokens": 1060,
+    "total_tokens": 1170
+  }
+}
