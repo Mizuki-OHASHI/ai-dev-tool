@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	apiKey = "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"
+	apiKey = ""
 	apiURL = "https://api.openai.com/v1/chat/completions"
 )
 
