@@ -1,4 +1,4 @@
-# 2023-09-18
+# 2023-09-18　OVERVIEW
 
 - Craft の publish_contents_templates を例に reference, model から controller, usecase, dao のコードをどれくらい生成ができるか試してみる
   - **目的** 課題の発見
@@ -14,3 +14,5 @@
     - これを繰り返す
   - モデル
     - gpt-s.5-turbo
+  - **課題**
+    - テストケースの自動生成 
