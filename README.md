@@ -1,4 +1,4 @@
-# 2023-09-28
+# 2023-09-18
 
 - Craft の publish_contents_templates を例に reference, model から controller, usecase, dao のコードをどれくらい生成ができるか試してみる
   - (chatGPT3.5)
