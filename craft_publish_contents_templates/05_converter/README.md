@@ -33,7 +33,7 @@ converter.go 内の関数を 1 つないし 2 つずつ生成させる.
   PublishContentsTemplatesInfoChannel(m.Channel)
   ```
 
-- ポインタまわりが少し違う.
+- ポインタまわりが少し違う (ことがある).
 
   ```go
   // want

@@ -1,0 +1,17 @@
+package main
+
+func main() {
+	var m string = "1, 3, 3, 4, 5, 5, 5, 7, 10"
+	var s int = 15
+
+	a := convertStringToIntArray(m)
+	frequencyCount := countNumberFrequency(a)
+	combinationCount := countCardCombinations(a, s)
+
+	printMapKeyAndValue(frequencyCount)
+	fmt.Println(combinationCount)
+
+  if combinationCount != 19 {
+    panic(fmt.Errorf("failed test case"))
+  }
+}

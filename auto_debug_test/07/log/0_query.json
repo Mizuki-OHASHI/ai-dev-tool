@@ -1,0 +1,18 @@
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {
+      "content": "You are an AI assistant and always write output of your response in Golang. Generate code that solve given problems.",
+      "role": "system"
+    },
+    {
+      "content": "package main\n\nfunc main() {\n\tvar m string = \"1, 3, 3, 4, 5, 5, 5, 7, 10\"\n\tvar s int = 15\n\n\ta := convertStringToIntArray(m)\n\tfrequencyCount := countNumberFrequency(a)\n\tcombinationCount := countCardCombinations(a, s)\n\n\tprintMapKeyAndValue(frequencyCount)\n\tfmt.Println(combinationCount)\n\n  if combinationCount != 19 {\n    panic(fmt.Errorf(\"failed test case: want 19 but got %v\", combinationCount))\n  }\n}",
+      "role": "user"
+    }
+  ],
+  "temperature": 0.5,
+  "max_tokens": 1000,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0
+}

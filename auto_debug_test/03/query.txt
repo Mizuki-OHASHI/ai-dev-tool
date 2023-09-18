@@ -1,0 +1,11 @@
+package main
+
+func factorial(n int) int {
+  // return n! (factorial)
+}
+
+func main() {
+  if factorial(6) != 720 {
+    panic(fmt.Errorf("wrong answer!"))
+  }
+}

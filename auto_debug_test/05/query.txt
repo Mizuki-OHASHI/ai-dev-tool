@@ -1,0 +1,39 @@
+package main
+
+import "fmt"
+
+// 文字列を整数の配列に変換する関数
+func convertStringToIntArray(m string) []int {
+	// 中身を埋める
+}
+
+// 各整数の出現回数を数える関数
+func countNumberFrequency(a []int) map[int]int {
+	// 中身を埋める
+}
+
+// 整数の合計をsにする方法が何通りあるかを数える関数
+func countCardCombinations(a []int, s int) int {
+	// 中身を埋める
+}
+
+// map[int]intのkeyとvalueをkeyの昇順に出力する関数
+func printMapKeyAndValue(m map[int]int) {
+	// 中身を埋める
+}
+
+func main() {
+	var m string = "1, 3, 3, 4, 5, 5, 5, 7, 10"
+	var s int = 15
+
+	a := convertStringToIntArray(m)
+	frequencyCount := countNumberFrequency(a)
+	combinationCount := countCardCombinations(a, s)
+
+	printMapKeyAndValue(frequencyCount)
+	fmt.Println(combinationCount)
+
+  if combinationCount != 19 {
+    panic(fmt.Errorf("failed test case"))
+  }
+}
