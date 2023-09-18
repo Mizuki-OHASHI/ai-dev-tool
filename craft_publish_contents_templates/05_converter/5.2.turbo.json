@@ -1,0 +1,21 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "```go\npackage controller\n\nimport (\n\t\"time\"\n\n\t\"github.com/your-module-path/model\"\n)\n\nfunc GetFromPublishContentsTemplates(m model.PublishContentsTemplates) (*PublishContentsTemplates, error) {\n\tp := \u0026PublishContentsTemplates{\n\t\tID:          m.ID.Hex(),\n\t\tTenantID:    m.TenantID,\n\t\tDisplayName: m.DisplayName,\n\t\tChannel:     PublishContentsTemplatesInfoChannel(m.Channel),\n\t\tCreatedBy:   m.CreatedBy,\n\t\tCreatedAt:   m.CreatedAt,\n\t\tUpdatedBy:   m.UpdatedBy,\n\t\tUpdatedAt:   m.UpdatedAt,\n\t\tContents:    m.Contents,\n\t\tRemarks:     m.Remarks,\n\t\tTags:        m.Tags,\n\t\tDeletedAt:   m.DeletedAt,\n\t}\n\n\treturn p, nil\n}\n```",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1694998500,
+  "id": "chatcmpl-7zwpQSGdPtToezo3ptc5sCl2w3eZ0",
+  "model": "gpt-3.5-turbo-0613",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 171,
+    "prompt_tokens": 403,
+    "total_tokens": 574
+  }
+}

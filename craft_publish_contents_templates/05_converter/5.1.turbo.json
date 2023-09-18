@@ -1,0 +1,21 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "```go\npackage controller\n\nimport (\n\t\"time\"\n\n\t\"github.com/your-package/model\"\n)\n\nfunc ListFromPublishContentsTemplatesList(s *model.PublishContentsTemplatesList) ([]PublishContentsTemplatesInfo, error) {\n\tvar result []PublishContentsTemplatesInfo\n\n\tfor _, item := range *s {\n\t\tpublishContentsTemplatesInfo := PublishContentsTemplatesInfo{\n\t\t\tChannel:     PublishContentsTemplatesInfoChannel(item.Channel),\n\t\t\tDisplayName: item.DisplayName,\n\t\t\tId:          item.ID.Hex(),\n\t\t\tTags:        \u0026item.Tags,\n\t\t\tUpdatedAt:   item.UpdatedAt,\n\t\t\tUpdatedBy:   \u0026item.UpdatedBy,\n\t\t}\n\n\t\tresult = append(result, publishContentsTemplatesInfo)\n\t}\n\n\treturn result, nil\n}\n```\n\nIn the above code, I have defined the `ListFromPublishContentsTemplatesList` function in the `controller` package. This function takes a pointer to `model.PublishContentsTemplatesList` as input and returns a slice of `PublishContentsTemplatesInfo` and an error.\n\nInside the function, I iterate over the `PublishContentsTemplatesList` and create a `PublishContentsTemplatesInfo` object for each item. I populate the fields of the `PublishContentsTemplatesInfo` object using the corresponding fields from the `PublishContentsTemplates` struct.\n\nFinally, I append the `PublishContentsTemplatesInfo` object to the `result` slice and return it along with a `nil` error.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1694997349,
+  "id": "chatcmpl-7zwWr2OCHnfE52XbAbmX8LJRlB8mj",
+  "model": "gpt-3.5-turbo-0613",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 292,
+    "prompt_tokens": 407,
+    "total_tokens": 699
+  }
+}
