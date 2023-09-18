@@ -16,3 +16,4 @@
     - gpt-s.5-turbo
   - **課題**
     - テストケースの自動生成 
+- Prompt Engineering: https://www.promptingguide.ai/jp
