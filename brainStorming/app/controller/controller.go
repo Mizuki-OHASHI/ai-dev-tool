@@ -5,7 +5,6 @@ import (
 	"main/model"
 	"main/usecase"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -22,9 +21,15 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["userId"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// id, err := strconv.Atoi(params["userId"])
+	// if err != nil {
+	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// 	return
+	// }
+	var err error
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Empty user ID", http.StatusBadRequest)
 		return
 	}
 
@@ -65,7 +70,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var err error
 	id := params["userId"]
 	if id == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		http.Error(w, "Empty user ID", http.StatusBadRequest)
 		return
 	}
 
@@ -88,9 +93,15 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["userId"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// id, err := strconv.Atoi(params["userId"])
+	// if err != nil {
+	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// 	return
+	// }
+	var err error
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Empty user ID", http.StatusBadRequest)
 		return
 	}
 

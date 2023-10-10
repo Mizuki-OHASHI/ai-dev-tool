@@ -9,7 +9,7 @@ func GetUsers() ([]model.User, error) {
 	return dao.GetUsers()
 }
 
-func GetUser(id int) (model.User, error) {
+func GetUser(id string) (model.User, error) {
 	return dao.GetUser(id)
 }
 
@@ -21,6 +21,6 @@ func UpdateUser(user *model.User) error {
 	return dao.UpdateUser(user)
 }
 
-func DeleteUser(id int) error {
+func DeleteUser(id string) error {
 	return dao.DeleteUser(id)
 }
