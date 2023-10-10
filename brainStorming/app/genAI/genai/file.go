@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -60,7 +61,7 @@ func parseTaskList(outputFilePath string) []string {
 	input := string(file)
 
 	// 正規表現パターン
-	pattern := "(^|\\n)([0-9]+)\\. ([\\s\\S]+?)($|\\n)"
+	pattern := "(\\n|^)\\{(\\n*)([0-9]+)\\. ([\\s\\S]+)\\}(\\n|$)"
 
 	// 正規表現をコンパイル
 	re := regexp.MustCompile(pattern)
@@ -75,9 +76,11 @@ func parseTaskList(outputFilePath string) []string {
 
 	// マッチした部分を処理
 	for _, match := range matches {
-		result := match[0]
+		result := strings.Join(match, "\n")
 		results = append(results, result)
 	}
+
+	fmt.Println(results)
 
 	return results
 }

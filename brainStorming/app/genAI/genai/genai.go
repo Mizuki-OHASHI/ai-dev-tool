@@ -30,7 +30,7 @@ func makeMessagesToBrainStorm() error {
 
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Generate task list with following style: `1. <package1>\n2. <package2>\n...` ",
+		Content: "Generate task list with following style: `{1. <package1>}\n {2. <package2>}\n...` ",
 	})
 	return nil
 }
@@ -52,7 +52,7 @@ func makeMessagesToBrainStorm() error {
 func makeMessagesToGenerateCodeWithTask(task string) error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Based on the above directory structure, file contents, generate a whole code to accomplish the task bellow. ",
+		Content: "Based on the above directory structure, file contents, generate a whole code to implement the features bellow. ",
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
