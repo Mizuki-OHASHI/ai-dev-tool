@@ -1,5 +1,7 @@
 package model
 
+import "errors"
+
 type SomeEntity struct {
 	ID    int    `json:"id"`
 	Name  string `json:"name"`
