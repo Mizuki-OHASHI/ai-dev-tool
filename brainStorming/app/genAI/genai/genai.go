@@ -33,7 +33,7 @@ func makeMessagesToBrainStorm() error {
 func makeMessagesToGenerateCode() error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Based on the above directory structure, file contents, generate a whole code which can serve both the user and task at the same time. ",
+		Content: "Based on the above directory structure, file contents, generate a whole code. ",
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
