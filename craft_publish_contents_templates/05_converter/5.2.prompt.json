@@ -1,0 +1,18 @@
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an AI assistant and always write output of your response in Golang."
+    },
+    {
+      "role": "user",
+      "content": "```go\npackage controller\n// PublishContentsTemplatesInfo List用\ntype PublishContentsTemplatesInfo struct {\n\t// Channel チャンネル名\n\tChannel PublishContentsTemplatesInfoChannel `json:\"channel\"`\n\n\t// DisplayName 表示名\n\tDisplayName string `json:\"display_name\"`\n\n\t// Id ユニークID\n\tId string `json:\"id\"`\n\n\t// Tags タグ\n\tTags *[]string `json:\"tags,omitempty\"`\n\n\t// UpdatedAt 最終更新日時\n\tUpdatedAt *time.Time `json:\"updated_at,omitempty\"`\n\n\t// UpdatedBy 最終更新者\n\tUpdatedBy *string `json:\"updated_by,omitempty\"`\n}\n\n// PublishContentsTemplatesInfoChannel チャンネル名\ntype PublishContentsTemplatesInfoChannel string\n```\n\n```go\npackage model\n\nimport (\n\t\"time\"\n\n\t\"go.mongodb.org/mongo-driver/bson/primitive\"\n)\n\ntype PublishContentsTemplates struct {\n\tID          primitive.ObjectID `bson:\"_id\"`\n\tTenantID    string             `bson:\"tenant_id\"`\n\tDisplayName string             `bson:\"display_name\"`\n\tChannel     string             `bson:\"channel\"`\n\tCreatedBy   string             `bson:\"created_by\"`\n\tCreatedAt   time.Time          `bson:\"created_at\"`\n\tUpdatedBy   string             `bson:\"updated_by\"`\n\tUpdatedAt   time.Time          `bson:\"updated_at\"`\n\tContents    map[string]any     `bson:\"contents\"`\n\tRemarks     string             `bson:\"remarks\"`\n\tTags        []string           `bson:\"tags\"`\n\tDeletedAt   time.Time          `bson:\"deleted_at\"`\n}\n\ntype PublishContentsTemplatesList = []PublishContentsTemplates\n```\n\nINSTRUCTION: define `func GetFromPublishContentsTemplates(m model.PublishContentsTemplates) (*PublishContentsTemplates, error)` at package controller"
+    }
+  ],
+  "temperature": 0.51,
+  "max_tokens": 1000,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0
+}

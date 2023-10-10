@@ -1,0 +1,35 @@
+system: ...
+user: ...
+assistant: ...
+user:
+```go
+package usecase
+
+import (
+...
+)
+
+type PublishContentsTemplatesUsecase interface {
+	List(ctx context.Context, tenantID string, req model.SearchQueryParameters) (model.PublishContentsTemplatesList, int64, bool, error)
+	Fetch(ctx context.Context, tenantID, id string) (*model.PublishContentsTemplates, error)
+	Create(ctx context.Context, templates model.PublishContentsTemplates) (string, error)
+	Update(ctx context.Context, templates model.PublishContentsTemplates) (string, error)
+	Delete(ctx context.Context, tenantID, id string) error
+}
+
+type publishContentsTemplatesUsecase struct {
+	d dao.PublishContentsTemplatesDao
+}
+
+func NewPublishContentsTemplatesUsecase(d dao.PublishContentsTemplatesDao) PublishContentsTemplatesUsecase {
+	return &publishContentsTemplatesUsecase{
+		d: d,
+	}
+}
+
+var ErrNotFoundPublishContentsTemplatesID = fmt.Errorf("not found publish contents templates id")
+...
+```
+
+DIRECTION:
+  - complete usecase

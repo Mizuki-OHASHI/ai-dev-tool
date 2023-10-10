@@ -1,0 +1,17 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Sure! Here's the code in Golang to output \"Hello World!\":\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello World!\")\n}\n```\n\nWhen you run this code, it will print \"Hello World!\" to the console.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1694958026,
+  "id": "chatcmpl-7zmIcpBPRoYhbizyTQ44ZyTMHZGys",
+  "model": "gpt-3.5-turbo-0613",
+  "object": "chat.completion",
+  "usage": { "completion_tokens": 57, "prompt_tokens": 38, "total_tokens": 95 }
+}

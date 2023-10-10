@@ -1,0 +1,26 @@
+package controller
+
+import (
+	"time"
+
+	"github.com/your-package/model"
+)
+
+func ListFromPublishContentsTemplatesList(s *model.PublishContentsTemplatesList) ([]PublishContentsTemplatesInfo, error) {
+	var result []PublishContentsTemplatesInfo
+
+	for _, item := range *s {
+		info := PublishContentsTemplatesInfo{
+			Channel:     PublishContentsTemplatesInfoChannel(item.Channel),
+			DisplayName: item.DisplayName,
+			Id:          item.ID.Hex(),
+			Tags:        &item.Tags,
+			UpdatedAt:   &item.UpdatedAt,
+			UpdatedBy:   &item.UpdatedBy,
+		}
+
+		result = append(result, info)
+	}
+
+	return result, nil
+}

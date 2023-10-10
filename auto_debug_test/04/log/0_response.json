@@ -1,0 +1,21 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Here is the code that solves the problem:\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc countCardCombinations(s int, a []int) int {\n    return helper(s, a, len(a)-1)\n}\n\nfunc helper(s int, a []int, i int) int {\n    if s == 0 {\n        return 1\n    }\n    if s \u003c 0 || i \u003c 0 {\n        return 0\n    }\n    return helper(s-a[i], a, i-1) + helper(s, a, i-1)\n}\n\nfunc main() {\n    if countCardCombinations(15, []int{1, 3, 3, 4, 5, 5, 5, 7, 10}) != 19 {\n        panic(fmt.Errorf(\"Test case failed\"))\n    }\n}\n```\n\nThe `countCardCombinations` function takes in the target sum `s` and an array `a` of integers written on the cards. It calls the `helper` function to recursively calculate the number of ways to select some cards and make the sum equal to `s`. The `helper` function uses backtracking to explore all possible combinations.\n\nIn the `main` function, a test case is provided to verify the correctness of the `countCardCombinations` function. If the result is not equal to the expected output, a panic is triggered with an error message.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1695022186,
+  "id": "chatcmpl-802zSSkSxcaYI7fJypUOii2SXAg8k",
+  "model": "gpt-3.5-turbo-0613",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 293,
+    "prompt_tokens": 156,
+    "total_tokens": 449
+  }
+}

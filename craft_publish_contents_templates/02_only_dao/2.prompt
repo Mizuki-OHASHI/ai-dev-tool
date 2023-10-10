@@ -1,0 +1,71 @@
+model/publish_contents_templates.go
+```
+package model
+
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type PublishContentsTemplates struct {
+	ID          primitive.ObjectID `bson:"_id"`
+	TenantID    string             `bson:"tenant_id"`
+	DisplayName string             `bson:"display_name"`
+	Channel     string             `bson:"channel"`
+	CreatedBy   string             `bson:"created_by"`
+	CreatedAt   time.Time          `bson:"created_at"`
+	UpdatedBy   string             `bson:"updated_by"`
+	UpdatedAt   time.Time          `bson:"updated_at"`
+	Contents    map[string]any     `bson:"contents"`
+	Remarks     string             `bson:"remarks"`
+	Tags        []string           `bson:"tags"`
+	DeletedAt   time.Time          `bson:"deleted_at"`
+}
+
+type PublishContentsTemplatesList = []PublishContentsTemplates
+```
+
+dao/publish_contents_templates.go
+```
+package dao
+
+import (..)
+
+type PublishContentsTemplatesDao interface {
+	List(ctx context.Context, req model.SearchQueryParameters) (model.PublishContentsTemplatesList, int64, error)
+	Fetch(ctx context.Context, tenantID, id string) (*model.PublishContentsTemplates, error)
+	Create(ctx context.Context, templates model.PublishContentsTemplates) (string, error)
+	Update(ctx context.Context, templates model.PublishContentsTemplates) (string, error)
+	Delete(ctx context.Context, tenantID, id string) error
+}
+
+type publishContentsTemplatesDao struct {
+	db        infra.MongoClientWrapper
+	tableName string
+}
+
+type publishContentsTemplatesMongoDBNoneID struct {
+	TenantID    string         `bson:"tenant_id"`
+	DisplayName string         `bson:"display_name"`
+	Channel     string         `bson:"channel"`
+	CreatedBy   string         `bson:"created_by"`
+	CreatedAt   time.Time      `bson:"created_at"`
+	UpdatedBy   string         `bson:"updated_by"`
+	UpdatedAt   time.Time      `bson:"updated_at"`
+	Contents    map[string]any `bson:"contents"`
+	Remarks     string         `bson:"remarks"`
+	Tags        []string       `bson:"tags"`
+	DeletedAt   time.Time      `bson:"deleted_at"`
+}
+
+func NewPublishContentsTemplatesDao(mongo infra.MongoClientWrapper) PublishContentsTemplatesDao {
+	return &publishContentsTemplatesDao{
+		db:        mongo,
+		tableName: "publish_contents_templates",
+	}
+}
+...
+```
+
+DIRECTION: complete dao

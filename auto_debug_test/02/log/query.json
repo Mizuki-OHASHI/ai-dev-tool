@@ -1,0 +1,26 @@
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {
+      "content": "You are an AI assistant and always write output of your response in Golang. Generate code that solve given problems considering error logs.",
+      "role": "system"
+    },
+    {
+      "content": "package main\n\nfunc factorial(n int) int {\n  // return n! (factorial)\n}\n\nfunc main() {\n  if factorial(6) != 720 {\n    panic(fmt.Error(\"wrong answer!\"))\n  }\n}",
+      "role": "user"
+    },
+    {
+      "content": "e main\n\nimport (\n\t\"fmt\"\n)\n\nfunc factorial(n int) int {\n\tif n == 0 {\n\t\treturn 1\n\t}\n\n\tfact := 1\n\tfor i := 1; i \u003c= n; i++ {\n\t\tfact *= i\n\t}\n\n\treturn fact\n}\n\nfunc main() {\n\tif factorial(6) != 720 {\n\t\tpanic(fmt.Errorf(\"wrong answer!\"))\n\t}\n\tfmt.Println(\"Correct answer!\"",
+      "role": "assistant"
+    },
+    {
+      "content": "Given code results in error! Fix it.\nexecution error: exit status 1\nStderr: temp.go:1:1: expected 'package', found e\n",
+      "role": "user"
+    }
+  ],
+  "temperature": 0.5,
+  "max_tokens": 1000,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0
+}

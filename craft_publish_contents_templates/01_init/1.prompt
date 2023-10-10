@@ -1,0 +1,381 @@
+model/publish_contents_templates.go
+```
+package model
+
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type PublishContentsTemplates struct {
+	ID          primitive.ObjectID `bson:"_id"`
+	TenantID    string             `bson:"tenant_id"`
+	DisplayName string             `bson:"display_name"`
+	Channel     string             `bson:"channel"`
+	CreatedBy   string             `bson:"created_by"`
+	CreatedAt   time.Time          `bson:"created_at"`
+	UpdatedBy   string             `bson:"updated_by"`
+	UpdatedAt   time.Time          `bson:"updated_at"`
+	Contents    map[string]any     `bson:"contents"`
+	Remarks     string             `bson:"remarks"`
+	Tags        []string           `bson:"tags"`
+	DeletedAt   time.Time          `bson:"deleted_at"`
+}
+
+type PublishContentsTemplatesList = []PublishContentsTemplates
+```
+
+reference/publish_contents_templates.yaml
+```
+openapi: 3.0.0
+x-stoplight:
+  id: ww1q1v92674m2
+info:
+  title: publish_contents_templates
+  version: '1.0'
+  description: 'https://www.notion.so/supsys/c7d413c43f374fb28d4e75bd1104b4af'
+paths:
+  /craft/v1/publish_contents_templates:
+    get:
+      summary: get contents templates
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPublishContentsTemplatesResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '500':
+          description: Internal Server Error
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/ErrorResponse
+      operationId: get-craft-v1-publish_contents_templates
+      parameters:
+        - $ref: ./common.yaml#/components/parameters/BrowserKeywords
+        - $ref: ./common.yaml#/components/parameters/BrowserRows
+        - $ref: ./common.yaml#/components/parameters/BrowserStartRow
+        - $ref: ./common.yaml#/components/parameters/BrowserOrderBy
+        - $ref: ./common.yaml#/components/parameters/BrowserFilter
+      description: ''
+    parameters: []
+    post:
+      summary: create contents templates
+      operationId: post-craft-v1-publish_contents_templates
+      responses:
+        '201':
+          $ref: '#/components/responses/PublishContentsTemplatesIDResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/ErrorResponse
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/PublishContentsTemplatesRequest'
+      description: ''
+  '/craft/v1/publish_contents_templates/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: get contents templates in detail
+      operationId: get-craft-v1-publish_contents_templates-id
+      responses:
+        '200':
+          $ref: '#/components/responses/GetPublishContentsTemplatesIDResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/ErrorResponse
+      parameters: []
+    put:
+      summary: update contents templates
+      operationId: put-craft-v1-publish_contents_templates-id
+      responses:
+        '200':
+          $ref: '#/components/responses/PublishContentsTemplatesIDResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/ErrorResponse
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/PublishContentsTemplatesRequest'
+    delete:
+      summary: delete contents templates
+      operationId: delete-craft-v1-publish_contents_templates-id
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/BadRequestResponse
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: ./common.yaml#/components/schemas/ErrorResponse
+      parameters: []
+components:
+  schemas:
+    PublishContentsTemplatesInfo:
+      title: PublishContentsTemplatesInfo
+      type: object
+      x-examples:
+        example-1:
+          id: '1001'
+          display_name: test for contents templates
+          channel: line
+          created_by: user_1
+          created_at: '2019-08-24T14:15:22Z'
+          updated_by: user_2
+          updated_at: '2019-08-24T14:15:22Z'
+          remarks: remarks
+          tag:
+            - tag1
+            - tag2
+      description: for List
+      properties:
+        id:
+          type: string
+          description: UID
+        display_name:
+          type: string
+          description: display name
+        channel:
+          type: string
+          description: channel name
+          enum:
+            - fcm_push
+            - line
+            - email
+            - sms
+        updated_by:
+          type: string
+          description: updated by
+        updated_at:
+          type: string
+          format: date-time
+          description: updated at
+        tags:
+          description: tag
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - display_name
+        - channel
+    PublishContentsTemplates:
+      title: PublishContentsTemplates
+      type: object
+      x-examples:
+        example-1:
+          id: '1001'
+          display_name: test for contents templates
+          channel: line
+          created_by: user_1
+          created_at: '2019-08-24T14:15:22Z'
+          updated_by: user_2
+          updated_at: '2019-08-24T14:15:22Z'
+          contents:
+            messages:
+              - type: text
+                text: 'Hello, world1'
+              - type: text
+                text: 'Hello, world2'
+          remarks: remarks
+          tag:
+            - tag1
+            - tag2
+      description: for GET request
+      properties:
+        id:
+          type: string
+          description: UID
+        display_name:
+          type: string
+          description: display name
+        channel:
+          type: string
+          description: channel name
+          enum:
+            - fcm_push
+            - line
+            - email
+            - sms
+        created_by:
+          type: string
+          description: created by
+        created_at:
+          type: string
+          format: date-time
+          description: created at
+        updated_by:
+          type: string
+          description: updated by
+        updated_at:
+          type: string
+          format: date-time
+          description: updated at
+        contents:
+          description: contents
+          type: object
+        remarks:
+          type: string
+          description: remarks
+        tags:
+          description: tag
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - display_name
+        - channel
+        - contents
+    PublishContentsTemplatesBody:
+      title: PublishContentsTemplatesBody
+      type: object
+      x-examples:
+        example-1:
+          display_name: test for contents templates
+          channel: line
+          contents:
+            messages:
+              - type: text
+                text: 'Hello, world1'
+              - type: text
+                text: 'Hello, world2'
+          remarks: remarks
+          tag:
+            - tag1
+            - tag2
+      description: for POST request
+      properties:
+        display_name:
+          type: string
+          description: display name
+        channel:
+          type: string
+          description: channel name
+          enum:
+            - fcm_push
+            - line
+            - email
+            - sms
+        contents:
+          description: contents
+          type: object
+        remarks:
+          type: string
+          description: remarks
+        tags:
+          description: tag
+          type: array
+          items:
+            type: string
+      required:
+        - display_name
+        - channel
+        - contents
+  responses:
+    ListPublishContentsTemplatesResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              meta:
+                $ref: ./common.yaml#/components/schemas/SearchMetadata
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublishContentsTemplatesInfo'
+    PublishContentsTemplatesIDResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+    GetPublishContentsTemplatesIDResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PublishContentsTemplates'
+  requestBodies:
+    PublishContentsTemplatesRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PublishContentsTemplatesBody'
+      description: ''
+  parameters: {}
+```
+
+MAKE CODE BELLOW:
+dao/publish_contents_templates.go
+controller/publishcontentstemplates/controller.go
+controller/publishcontentstemplates/converter.go
