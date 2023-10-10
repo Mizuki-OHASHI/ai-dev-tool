@@ -1,0 +1,190 @@
+../model/model.go
+```
+package model
+
+type User struct {
+	ID        int    `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+```../usecase/usecase.go
+```
+package usecase
+
+import (
+	"main/dao"
+	"main/model"
+)
+
+func CreateUser(user *model.User) error {
+	query := "INSERT INTO users(first_name, last_name, email, password) VALUES(?, ?, ?, ?)"
+	_, err := dao.Db.Exec(query, user.FirstName, user.LastName, user.Email, user.Password)
+	return err
+}
+
+func GetUser(id int) (*model.User, error) {
+	user := &model.User{}
+	query := "SELECT * FROM users WHERE id = ?"
+	err := dao.Db.QueryRow(query, id).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password)
+	return user, err
+}
+
+func UpdateUser(user *model.User) error {
+	query := "UPDATE users SET first_name = ?, last_name = ?, email = ?, password = ? WHERE id = ?"
+	_, err := dao.Db.Exec(query, user.FirstName, user.LastName, user.Email, user.Password, user.ID)
+	return err
+}
+
+func DeleteUser(id int) error {
+	query := "DELETE FROM users WHERE id = ?"
+	_, err := dao.Db.Exec(query, id)
+	return err
+}
+```../main.go
+```
+package main
+
+import (
+	"fmt"
+	"log"
+	"main/controller"
+	"main/dao"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	dao.CloseDBWithSysCall()
+
+	r := mux.NewRouter()
+
+	r.HandleFunc("/users", controller.GetUsers).Methods("GET")
+	r.HandleFunc("/users/{id}", controller.GetUser).Methods("GET")
+	r.HandleFunc("/users", controller.CreateUser).Methods("POST")
+	r.HandleFunc("/users/{id}", controller.UpdateUser).Methods("PUT")
+	r.HandleFunc("/users/{id}", controller.DeleteUser).Methods("DELETE")
+
+	log.Printf("Listening...")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), r); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func init() {
+
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("fail: godotenv.Load, %v\n", err)
+	}
+
+	dao.OpenSql()
+}
+```I'm sorry for the confusion, but testing the application doesn't involve editing a specific file in the project. Instead, it involves running the application and making requests to the API endpoints to ensure they are working as expected. 
+
+You can use tools like Postman or curl to make requests to your API and check the responses. 
+
+For example, to test the "GetUser" endpoint, you could use curl in the terminal:
+
+```
+curl http://localhost:8080/users/1
+```
+
+This should return the user with ID 1 if everything is working correctly. 
+
+You can also write automated tests in a separate `_test.go` file, but this is not required for basic functionality testing.../controller/controller.go
+```
+package controller
+
+import (
+	"encoding/json"
+	"fmt"
+	"main/model"
+	"main/usecase"
+	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
+)
+
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+	// This function should fetch all users from the database and return them
+	// Error handling should be added here
+}
+
+func GetUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	user, err := usecase.GetUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
+
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	var user model.User
+	_ = json.NewDecoder(r.Body).Decode(&user)
+	err := usecase.CreateUser(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
+
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	var user model.User
+	_ = json.NewDecoder(r.Body).Decode(&user)
+	user.ID = id
+
+	err = usecase.UpdateUser(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	err = usecase.DeleteUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(w, "User deleted successfully")
+}
+```

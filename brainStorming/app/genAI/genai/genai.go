@@ -25,12 +25,12 @@ func makeMessagesListedFiles() error {
 func makeMessagesToBrainStorm() error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "List tasks you need to do to complete the code by comparing the definition of api and database with the existing code. ",
+		Content: "List the features to be implemented for each package by comparing the definition of api and database with the existing code. ",
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Generate task list with following style: `1. <task1>\n2. <task2>\n...` ",
+		Content: "Generate task list with following style: `1. <package1>\n2. <package2>\n...` ",
 	})
 	return nil
 }
@@ -193,7 +193,7 @@ func openaiAPI(outputType string) error {
 		}
 		defer file.Close()
 
-		_, err = fmt.Fprint(file, res.Choices[0].Message.Content)
+		_, err = fmt.Fprintf(file, "\n\n%s", res.Choices[0].Message.Content)
 		if err != nil {
 			return fmt.Errorf("failed to write to the file for output: %w", err)
 		}

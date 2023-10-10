@@ -1,0 +1,10 @@
+1. Define the necessary data structures in the `model.go` file that will represent the tables in the database.
+2. Implement the necessary CRUD (Create, Read, Update, Delete) operations in the `dao.go` file for interacting with the database.
+3. In the `usecase.go` file, implement the business logic that will use the CRUD operations defined in the `dao.go` file.
+4. In the `controller.go` file, define the necessary HTTP handlers that will handle the incoming HTTP requests, use the business logic defined in the `usecase.go` file, and send back the HTTP responses.
+5. In the `main.go` file, register the HTTP handlers defined in the `controller.go` file to their respective routes.
+6. Also in the `main.go` file, make sure to load the environment variables, open the database connection, and start the HTTP server.
+7. Test the application to make sure everything is working as expected.
+8. Document the code and the API.
+9. Handle possible errors and edge cases.
+10. Optimize the code for performance if necessary.
