@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/sashabaranov/go-openai"
@@ -30,7 +31,7 @@ func makeMessagesToBrainStorm() error {
 
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Generate task list with following style: `{1. <package1>}\n {2. <package2>}\n...` ",
+		Content: "Generate task list with following style: `1. <package1>\n 2. <package2>\n...` ",
 	})
 	return nil
 }
@@ -98,6 +99,7 @@ func GenAI() {
 	}
 
 	taskList := parseTaskList("out1")
+	fmt.Println(strings.Join(taskList, "\n========================\n"))
 
 	for idx, task := range taskList {
 		if err = makeMessagesToGenerateCodeWithTask(task); err != nil {
