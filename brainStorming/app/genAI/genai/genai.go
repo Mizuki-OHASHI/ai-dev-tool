@@ -33,7 +33,7 @@ func makeMessagesToBrainStorm() error {
 func makeMessagesToGenerateCode() error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Based on the above directory structure, file contents, generate a whole code. ",
+		Content: "Based on the above directory structure, file contents, generate a whole code according to tha tasks you listed. ",
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
@@ -67,6 +67,11 @@ func GenAI() {
 		log.Println(err)
 		return
 	}
+	err = openaiAPI(true)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	if err = makeMessagesToGenerateCode(); err != nil {
 		log.Println(err)
@@ -78,7 +83,7 @@ func GenAI() {
 		log.Println(err)
 		return
 	}
-	parseFiles("out")
+	parseFiles("out2")
 }
 
 func openaiAPI(continueConversation bool) error {
