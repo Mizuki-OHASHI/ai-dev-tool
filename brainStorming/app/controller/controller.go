@@ -2,9 +2,9 @@ package controller
 
 import (
 	"encoding/json"
-	"net/http"
 	"main/model"
 	"main/usecase"
+	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
