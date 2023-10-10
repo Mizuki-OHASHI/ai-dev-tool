@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // 以下手動で追加
@@ -53,7 +55,7 @@ func CloseDBWithSysCall() {
 
 // 以上手動で追加
 
-func GetUser(id int) (*model.User, error) {
+func GetUser(id string) (*model.User, error) {
 	row := Db.QueryRow("SELECT * FROM users WHERE id = ?", id)
 
 	user := &model.User{}

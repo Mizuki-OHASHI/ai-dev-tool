@@ -4,16 +4,15 @@ import (
 	"encoding/json"
 	"main/usecase"
 	"net/http"
-	"strconv"
 )
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	id := r.URL.Query().Get("id")
+	// id, err := strconv.Atoi(idStr)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
 	user, err := usecase.GetUser(id)
 	if err != nil {

@@ -5,6 +5,6 @@ import (
 	"main/model"
 )
 
-func GetUser(id int) (*model.User, error) {
+func GetUser(id string) (*model.User, error) {
 	return dao.GetUser(id)
 }
