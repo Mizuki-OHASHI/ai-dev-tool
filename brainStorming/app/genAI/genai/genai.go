@@ -27,13 +27,37 @@ func makeMessagesToBrainStorm() error {
 		Role:    "user",
 		Content: "List tasks you need to do to complete the code by comparing the definition of api and database with the existing code. ",
 	})
+
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    "user",
+		Content: "Generate task list with following style: `1. <task1>\n2. <task2>\n...` ",
+	})
 	return nil
 }
 
-func makeMessagesToGenerateCode() error {
+// func makeMessagesToGenerateCode() error {
+// 	messages = append(messages, openai.ChatCompletionMessage{
+// 		Role:    "user",
+// 		Content: "Based on the above directory structure, file contents, generate a whole code. ",
+// 	})
+
+// 	messages = append(messages, openai.ChatCompletionMessage{
+// 		Role:    "user",
+// 		Content: "Generate the only file that is edited, with following style: \nfile path\n```\nfile contents\n```\n",
+// 	})
+
+// 	return nil
+// }
+
+func makeMessagesToGenerateCodeWithTask(task string) error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Based on the above directory structure, file contents, generate a whole code. ",
+		Content: "Based on the above directory structure, file contents, generate a whole code to accomplish the task bellow. ",
+	})
+
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    "user",
+		Content: task,
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
@@ -67,21 +91,44 @@ func GenAI() {
 		log.Println(err)
 		return
 	}
-
-	if err = makeMessagesToGenerateCode(); err != nil {
-		log.Println(err)
-		return
-	}
-
-	err = openaiAPI(false)
+	err = openaiAPI("task list")
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	parseFiles("out")
+
+	taskList := parseTaskList("out1")
+
+	for idx, task := range taskList {
+		if err = makeMessagesToGenerateCodeWithTask(task); err != nil {
+			log.Println(err)
+			return
+		}
+		if idx == 0 {
+			err = openaiAPI("code init")
+		} else {
+			err = openaiAPI("code repeat")
+		}
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
+	// if err = makeMessagesToGenerateCode(); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	// err = openaiAPI("code init")
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+	parseFiles("out2")
 }
 
-func openaiAPI(continueConversation bool) error {
+func openaiAPI(outputType string) error {
 	err := godotenv.Load(".env")
 	if err != nil {
 		return fmt.Errorf("failed to load .env file")
@@ -104,7 +151,8 @@ func openaiAPI(continueConversation bool) error {
 
 	log.Println("prompt_tokens: ", res.Usage.PromptTokens, "completion_tokens: ", res.Usage.CompletionTokens, "total_tokens: ", res.Usage.TotalTokens)
 
-	if continueConversation {
+	switch outputType {
+	case "task list":
 		messages = append(messages, res.Choices[0].Message)
 
 		file, err := os.OpenFile("out1", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
@@ -119,8 +167,11 @@ func openaiAPI(continueConversation bool) error {
 		}
 
 		return nil
-	} else {
-		file, err := os.OpenFile("out2", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+
+	case "code init":
+		messages = append(messages, res.Choices[0].Message)
+
+		file, err := os.OpenFile("out2", os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
 			return fmt.Errorf("failed to open the file for output: %w", err)
 		}
@@ -132,5 +183,24 @@ func openaiAPI(continueConversation bool) error {
 		}
 
 		return nil
+
+	case "code repeat":
+		messages = append(messages, res.Choices[0].Message)
+
+		file, err := os.OpenFile("out2", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to open the file for output: %w", err)
+		}
+		defer file.Close()
+
+		_, err = fmt.Fprint(file, res.Choices[0].Message.Content)
+		if err != nil {
+			return fmt.Errorf("failed to write to the file for output: %w", err)
+		}
+
+		return nil
+
+	default:
+		return fmt.Errorf("invalid outputType: %s", outputType)
 	}
 }

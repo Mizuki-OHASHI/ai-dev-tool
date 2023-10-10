@@ -50,6 +50,38 @@ func addFileContent(filePath string) error {
 	return nil
 }
 
+func parseTaskList(outputFilePath string) []string {
+	file, err := os.ReadFile(outputFilePath)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	input := string(file)
+
+	// 正規表現パターン
+	pattern := "(^|\\n)([0-9]+)\\. ([\\s\\S]+?)($|\\n)"
+
+	// 正規表現をコンパイル
+	re := regexp.MustCompile(pattern)
+
+	// マッチした部分を格納するスライス
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	fmt.Println(matches)
+
+	// マッチした内容を格納する配列
+	var results []string
+
+	// マッチした部分を処理
+	for _, match := range matches {
+		result := match[0]
+		results = append(results, result)
+	}
+
+	return results
+}
+
 func parseFiles(outputFilePath string) {
 	file, err := os.ReadFile(outputFilePath)
 	if err != nil {
