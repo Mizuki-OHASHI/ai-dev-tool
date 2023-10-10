@@ -106,9 +106,21 @@ func openaiAPI(continueConversation bool) error {
 
 	if continueConversation {
 		messages = append(messages, res.Choices[0].Message)
+
+		file, err := os.OpenFile("out1", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to open the file for output: %w", err)
+		}
+		defer file.Close()
+
+		_, err = fmt.Fprint(file, res.Choices[0].Message.Content)
+		if err != nil {
+			return fmt.Errorf("failed to write to the file for output: %w", err)
+		}
+
 		return nil
 	} else {
-		file, err := os.OpenFile("out", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		file, err := os.OpenFile("out2", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			return fmt.Errorf("failed to open the file for output: %w", err)
 		}
