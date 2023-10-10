@@ -22,13 +22,13 @@ func makeMessagesListedFiles() error {
 	return nil
 }
 
-func makeMessagesToBrainStorm() error {
-	messages = append(messages, openai.ChatCompletionMessage{
-		Role:    "user",
-		Content: "List tasks you need to do to complete the code by comparing the definition of api and database with the existing code. ",
-	})
-	return nil
-}
+// func makeMessagesToBrainStorm() error {
+// 	messages = append(messages, openai.ChatCompletionMessage{
+// 		Role:    "user",
+// 		Content: "List tasks you need to do to complete the code by comparing the definition of api and database with the existing code. ",
+// 	})
+// 	return nil
+// }
 
 func makeMessagesToGenerateCode() error {
 	messages = append(messages, openai.ChatCompletionMessage{
@@ -63,10 +63,10 @@ func GenAI() {
 		return
 	}
 
-	if err = makeMessagesToBrainStorm(); err != nil {
-		log.Println(err)
-		return
-	}
+	// if err = makeMessagesToBrainStorm(); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
 
 	if err = makeMessagesToGenerateCode(); err != nil {
 		log.Println(err)
@@ -78,7 +78,7 @@ func GenAI() {
 		log.Println(err)
 		return
 	}
-	parseFiles("out")
+	parseFiles("out2")
 }
 
 func openaiAPI(continueConversation bool) error {
