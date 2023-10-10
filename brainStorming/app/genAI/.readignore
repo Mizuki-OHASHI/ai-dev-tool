@@ -1,0 +1,10 @@
+.git/
+.DS_Store
+.env
+.gitignore
+.idea
+README.md
+go.mod
+go.sum
+genAI/
+serviceAccount.json

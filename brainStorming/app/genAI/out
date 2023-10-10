@@ -1,0 +1,61 @@
+../main.go
+```
+package main
+
+import (
+	"fmt"
+	"log"
+	"main/controller"
+	"main/dao"
+	"net/http"
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	http.HandleFunc("/user", controller.UserHandler)
+	http.HandleFunc("/task", controller.TaskHandler)
+
+	dao.CloseDBWithSysCall()
+
+	log.Printf("Listening...")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func init() {
+
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("fail: godotenv.Load, %v\n", err)
+	}
+
+	dao.OpenSql()
+}
+```
+
+../controller/controller.go
+```
+package controller
+
+import (
+	"net/http"
+)
+
+func UserHandler(w http.ResponseWriter, r *http.Request) {
+	// Handle user requests here
+}
+
+func TaskHandler(w http.ResponseWriter, r *http.Request) {
+	// Handle task requests here
+}
+```
+
+Note: You need to implement the logic inside UserHandler and TaskHandler according to your requirements.
