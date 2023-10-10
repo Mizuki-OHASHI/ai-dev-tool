@@ -57,8 +57,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["userId"])
-	if err != nil {
+	// id, err := strconv.Atoi(params["userId"])
+	// if err != nil {
+	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// 	return
+	// }
+	var err error
+	id := params["userId"]
+	if id == "" {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
