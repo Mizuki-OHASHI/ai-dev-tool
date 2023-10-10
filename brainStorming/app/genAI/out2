@@ -1,0 +1,122 @@
+Sure, here is a simple example of how you might implement the tasks listed above:
+
+../model/model.go
+```
+package model
+
+type User struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+```
+
+../dao/dao.go
+```
+package dao
+
+import (
+	"main/model"
+)
+
+func GetUser(id int) (*model.User, error) {
+	row := Db.QueryRow("SELECT * FROM users WHERE id = ?", id)
+
+	user := &model.User{}
+	err := row.Scan(&user.ID, &user.Name, &user.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+```
+
+../usecase/usecase.go
+```
+package usecase
+
+import (
+	"main/dao"
+	"main/model"
+)
+
+func GetUser(id int) (*model.User, error) {
+	return dao.GetUser(id)
+}
+```
+
+../controller/controller.go
+```
+package controller
+
+import (
+	"encoding/json"
+	"main/usecase"
+	"net/http"
+	"strconv"
+)
+
+func GetUser(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := usecase.GetUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
+```
+
+../main.go
+```
+package main
+
+import (
+	"fmt"
+	"log"
+	"main/controller"
+	"main/dao"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	dao.CloseDBWithSysCall()
+
+	r := mux.NewRouter()
+	r.HandleFunc("/user", controller.GetUser).Methods("GET")
+
+	log.Printf("Listening...")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), r); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func init() {
+
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("fail: godotenv.Load, %v\n", err)
+	}
+
+	dao.OpenSql()
+}
+```
+
+Please note that this is a very basic example and does not include all the tasks listed above, such as error handling, testing, and documentation. Also, the actual implementation will depend on the specific requirements of your application.

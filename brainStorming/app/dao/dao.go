@@ -3,8 +3,8 @@ package dao
 import (
 	"database/sql"
 	"fmt"
-
 	"log"
+	"main/model"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +12,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// 以下手動で追加
 var Db *sql.DB
 
 func OpenSql() {
@@ -50,4 +51,18 @@ func CloseDBWithSysCall() {
 		log.Printf("success: Db.Close")
 		os.Exit(0)
 	}()
+}
+
+// 以上手動で追加
+
+func GetUser(id string) (*model.User, error) {
+	row := Db.QueryRow("SELECT * FROM users WHERE id = ?", id)
+
+	user := &model.User{}
+	err := row.Scan(&user.ID, &user.Name, &user.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
