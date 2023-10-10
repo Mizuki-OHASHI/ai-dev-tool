@@ -60,15 +60,13 @@ func parseTaskList(outputFilePath string) []string {
 	input := string(file)
 
 	// 正規表現パターン
-	pattern := "(^|\\n)([0-9]+)\\. ([\\s\\S]+?)($|\\n)"
+	pattern := "([0-9]+)\\.\\s(.*)((\\n(\\s+)\\-\\s(.*))+)"
 
 	// 正規表現をコンパイル
 	re := regexp.MustCompile(pattern)
 
 	// マッチした部分を格納するスライス
 	matches := re.FindAllStringSubmatch(input, -1)
-
-	fmt.Println(matches)
 
 	// マッチした内容を格納する配列
 	var results []string
@@ -78,6 +76,8 @@ func parseTaskList(outputFilePath string) []string {
 		result := match[0]
 		results = append(results, result)
 	}
+
+	fmt.Println(len(results))
 
 	return results
 }

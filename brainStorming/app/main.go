@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"main/controller"
 	"main/dao"
 	"net/http"
 	"os"
@@ -12,6 +13,8 @@ import (
 
 func main() {
 	dao.CloseDBWithSysCall()
+
+	http.HandleFunc("/api/some-endpoint", controller.HandleRequest)
 
 	log.Printf("Listening...")
 

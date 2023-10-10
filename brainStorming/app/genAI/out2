@@ -1,15 +1,141 @@
+../controller/controller.go
+```
+package controller
+
+import (
+	"encoding/json"
+	"net/http"
+	"main/usecase"
+)
+
+func HandleRequest(w http.ResponseWriter, r *http.Request) {
+	// Parse request data
+	var requestData map[string]interface{}
+	err := json.NewDecoder(r.Body).Decode(&requestData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Validate request data
+	if requestData["key"] == nil {
+		http.Error(w, "key is missing", http.StatusBadRequest)
+		return
+	}
+
+	// Call the appropriate usecase function with the parsed data
+	responseData, err := usecase.SomeFunction(requestData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Handle the response from the usecase and send it back to the client
+	jsonResponse, err := json.Marshal(responseData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+}
+```
+
+../dao/dao.go
+```
+package dao
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+var Db *sql.DB
+
+func OpenSql() {
+	var (
+		mysqlUser     = os.Getenv("MYSQL_USER")
+		mysqlUserPwd  = os.Getenv("MYSQL_ROOT_PASSWORD")
+		mysqlHost     = os.Getenv("MYSQL_HOST")
+		mysqlDatabase = os.Getenv("MYSQL_DATABASE")
+	)
+
+	connStr := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
+	Db_, err := sql.Open("mysql", connStr)
+	if err != nil {
+		log.Fatalf("fail: sql.Open, %v\n", err)
+	}
+
+	if err := Db_.Ping(); err != nil {
+		log.Fatalf("fail: Db_.Ping, %v\n", err)
+	}
+
+	Db = Db_
+}
+
+func CloseDBWithSysCall() {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
+
+	go func() {
+		s := <-sig
+		log.Printf("received syscall, %v\n", s)
+
+		if err := Db.Close(); err != nil {
+			log.Fatal(err)
+		}
+
+		log.Printf("success: Db.Close")
+		os.Exit(0)
+	}()
+}
+
+// Implement function for database operation
+func GetSomeData(key string) (map[string]interface{}, error) {
+	row := Db.QueryRow("SELECT * FROM some_table WHERE key = ?", key)
+
+	var data map[string]interface{}
+	err := row.Scan(&data)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return data, nil
+}
+```
+
 ../model/model.go
 ```
 package model
 
-type User struct {
-	ID        int    `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
+type SomeEntity struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
-```../usecase/usecase.go
+
+func (e *SomeEntity) Validate() error {
+	if e.Name == "" {
+		return errors.New("name is required")
+	}
+	if e.Value == "" {
+		return errors.New("value is required")
+	}
+	return nil
+}
+```
+
+../usecase/usecase.go
 ```
 package usecase
 
@@ -18,31 +144,35 @@ import (
 	"main/model"
 )
 
-func CreateUser(user *model.User) error {
-	query := "INSERT INTO users(first_name, last_name, email, password) VALUES(?, ?, ?, ?)"
-	_, err := dao.Db.Exec(query, user.FirstName, user.LastName, user.Email, user.Password)
-	return err
-}
+func SomeFunction(data map[string]interface{}) (map[string]interface{}, error) {
+	// Convert the data to the appropriate model
+	entity := model.SomeEntity{
+		Name:  data["name"].(string),
+		Value: data["value"].(string),
+	}
 
-func GetUser(id int) (*model.User, error) {
-	user := &model.User{}
-	query := "SELECT * FROM users WHERE id = ?"
-	err := dao.Db.QueryRow(query, id).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password)
-	return user, err
-}
+	// Validate the model
+	if err := entity.Validate(); err != nil {
+		return nil, err
+	}
 
-func UpdateUser(user *model.User) error {
-	query := "UPDATE users SET first_name = ?, last_name = ?, email = ?, password = ? WHERE id = ?"
-	_, err := dao.Db.Exec(query, user.FirstName, user.LastName, user.Email, user.Password, user.ID)
-	return err
-}
+	// Call the appropriate dao function with the necessary data
+	dbData, err := dao.GetSomeData(entity.Name)
+	if err != nil {
+		return nil, err
+	}
 
-func DeleteUser(id int) error {
-	query := "DELETE FROM users WHERE id = ?"
-	_, err := dao.Db.Exec(query, id)
-	return err
+	// Handle the response from the dao and return it to the controller
+	responseData := map[string]interface{}{
+		"entity": entity,
+		"dbData": dbData,
+	}
+
+	return responseData, nil
 }
-```../main.go
+```
+
+../main.go
 ```
 package main
 
@@ -54,20 +184,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	dao.CloseDBWithSysCall()
 
-	r := mux.NewRouter()
-
-	r.HandleFunc("/users", controller.GetUsers).Methods("GET")
-	r.HandleFunc("/users/{id}", controller.GetUser).Methods("GET")
-	r.HandleFunc("/users", controller.CreateUser).Methods("POST")
-	r.HandleFunc("/users/{id}", controller.UpdateUser).Methods("PUT")
-	r.HandleFunc("/users/{id}", controller.DeleteUser).Methods("DELETE")
+	http.HandleFunc("/api/some-endpoint", controller.HandleRequest)
 
 	log.Printf("Listening...")
 
@@ -76,7 +199,7 @@ func main() {
 		port = "8080"
 	}
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), r); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -88,103 +211,5 @@ func init() {
 	}
 
 	dao.OpenSql()
-}
-```I'm sorry for the confusion, but testing the application doesn't involve editing a specific file in the project. Instead, it involves running the application and making requests to the API endpoints to ensure they are working as expected. 
-
-You can use tools like Postman or curl to make requests to your API and check the responses. 
-
-For example, to test the "GetUser" endpoint, you could use curl in the terminal:
-
-```
-curl http://localhost:8080/users/1
-```
-
-This should return the user with ID 1 if everything is working correctly. 
-
-You can also write automated tests in a separate `_test.go` file, but this is not required for basic functionality testing.../controller/controller.go
-```
-package controller
-
-import (
-	"encoding/json"
-	"fmt"
-	"main/model"
-	"main/usecase"
-	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
-)
-
-func GetUsers(w http.ResponseWriter, r *http.Request) {
-	// This function should fetch all users from the database and return them
-	// Error handling should be added here
-}
-
-func GetUser(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	user, err := usecase.GetUser(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(user)
-}
-
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user model.User
-	_ = json.NewDecoder(r.Body).Decode(&user)
-	err := usecase.CreateUser(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(user)
-}
-
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	var user model.User
-	_ = json.NewDecoder(r.Body).Decode(&user)
-	user.ID = id
-
-	err = usecase.UpdateUser(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(user)
-}
-
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	err = usecase.DeleteUser(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(w, "User deleted successfully")
 }
 ```

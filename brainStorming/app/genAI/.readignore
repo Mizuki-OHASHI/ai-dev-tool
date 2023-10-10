@@ -7,4 +7,3 @@ README.md
 go.mod
 go.sum
 genAI/
-serviceAccount.json
