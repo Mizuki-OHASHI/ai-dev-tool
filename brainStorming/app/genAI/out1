@@ -1,24 +1,23 @@
-1. `controller` package:
+1. controller
    - Implement HTTP handlers for each API endpoint.
    - Parse request data and validate it.
-   - Call the appropriate usecase function for each endpoint.
-   - Handle errors and send appropriate HTTP responses.
+   - Call the appropriate usecase function with the parsed data.
+   - Handle the response from the usecase and send it back to the client.
 
-2. `dao` package:
-   - Implement functions for each database operation required by the API.
-   - Handle database errors and return them to the caller.
+2. dao
+   - Implement functions for each database operation required by the usecases.
+   - Handle database errors and return them to the usecase.
 
-3. `model` package:
+3. model
    - Define structs for each entity in the database.
-   - Define structs for each API request and response.
+   - Define methods for validating and manipulating these entities.
 
-4. `usecase` package:
-   - Implement functions for each use case of the API.
-   - Call the appropriate dao function for each use case.
-   - Handle errors returned by the dao functions and return them to the caller.
+4. usecase
+   - Implement functions for each usecase in the application.
+   - Call the appropriate dao function with the necessary data.
+   - Handle the response from the dao and return it to the controller.
 
-5. `main` package:
-   - Load environment variables.
-   - Open a connection to the database.
-   - Start the HTTP server.
-   - Handle system signals to gracefully shut down the server and close the database connection.
+5. main
+   - Set up the HTTP server and route each endpoint to the appropriate controller handler.
+   - Load environment variables and open the database connection.
+   - Handle graceful shutdown of the application.

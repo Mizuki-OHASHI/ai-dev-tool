@@ -3,7 +3,6 @@ package dao
 import (
 	"database/sql"
 	"fmt"
-
 	"log"
 	"os"
 	"os/signal"
@@ -50,4 +49,20 @@ func CloseDBWithSysCall() {
 		log.Printf("success: Db.Close")
 		os.Exit(0)
 	}()
+}
+
+// Implement function for database operation
+func GetSomeData(key string) (map[string]interface{}, error) {
+	row := Db.QueryRow("SELECT * FROM some_table WHERE key = ?", key)
+
+	var data map[string]interface{}
+	err := row.Scan(&data)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return data, nil
 }

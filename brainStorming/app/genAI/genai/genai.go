@@ -99,6 +99,10 @@ func GenAI() {
 	}
 
 	taskList := parseTaskList("out1")
+	if len(taskList) == 0 {
+		log.Println("task list is empty")
+		return
+	}
 	fmt.Println(strings.Join(taskList, "\n========================\n"))
 
 	for idx, task := range taskList {
@@ -127,6 +131,7 @@ func GenAI() {
 	// 	log.Println(err)
 	// 	return
 	// }
+
 	parseFiles("out2")
 }
 
