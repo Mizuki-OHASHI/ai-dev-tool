@@ -46,6 +46,10 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	err = usecase.CreatePost(&post)
 	if err != nil {
+		if err.Error() == "user does not exist" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

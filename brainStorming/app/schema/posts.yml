@@ -93,6 +93,8 @@ components:
           type: string
         posted_by:
           type: string
+        user_name:
+          type: string
         title:
           type: string
         body:

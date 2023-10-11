@@ -3,14 +3,14 @@
 package dao
 
 import (
-	"main/model"
 	"errors"
+	"main/model"
 )
 
 func GetUsers() ([]model.User, error) {
 	rows, err := Db.Query("SELECT * FROM users")
 	if err != nil {
-		return nil, errors.New("Failed to fetch users from database")
+		return nil, errors.New("failed to fetch users from database")
 	}
 	defer rows.Close()
 
@@ -18,7 +18,7 @@ func GetUsers() ([]model.User, error) {
 	for rows.Next() {
 		var user model.User
 		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt); err != nil {
-			return nil, errors.New("Failed to scan user data")
+			return nil, errors.New("failed to scan user data")
 		}
 		users = append(users, user)
 	}
@@ -30,7 +30,7 @@ func GetUser(id string) (model.User, error) {
 	var user model.User
 	err := Db.QueryRow("SELECT * FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		return model.User{}, errors.New("Failed to fetch user from database")
+		return model.User{}, errors.New("failed to fetch user from database")
 	}
 
 	return user, nil
@@ -39,7 +39,7 @@ func GetUser(id string) (model.User, error) {
 func CreateUser(user *model.User) error {
 	_, err := Db.Exec("INSERT INTO users (id, name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())", user.ID, user.Name, user.Email, user.Password)
 	if err != nil {
-		return errors.New("Failed to insert user into database")
+		return errors.New("failed to insert user into database")
 	}
 	return nil
 }
@@ -47,7 +47,7 @@ func CreateUser(user *model.User) error {
 func UpdateUser(user *model.User) error {
 	_, err := Db.Exec("UPDATE users SET name = ?, email = ?, password = ?, updated_at = NOW() WHERE id = ?", user.Name, user.Email, user.Password, user.ID)
 	if err != nil {
-		return errors.New("Failed to update user in database")
+		return errors.New("failed to update user in database")
 	}
 	return nil
 }
@@ -55,7 +55,7 @@ func UpdateUser(user *model.User) error {
 func DeleteUser(id string) error {
 	_, err := Db.Exec("DELETE FROM users WHERE id = ?", id)
 	if err != nil {
-		return errors.New("Failed to delete user from database")
+		return errors.New("failed to delete user from database")
 	}
 	return nil
 }
@@ -64,13 +64,22 @@ func IsUsernameExists(username string) (bool, error) {
 	var exists bool
 	err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE name=?)", username).Scan(&exists)
 	if err != nil {
-		return false, errors.New("Failed to check if username exists in database")
+		return false, errors.New("failed to check if username exists in database")
+	}
+	return exists, nil
+}
+
+func IsUserExists(id string) (bool, error) {
+	var exists bool
+	err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id=?)", id).Scan(&exists)
+	if err != nil {
+		return false, errors.New("failed to check if user exists in database")
 	}
 	return exists, nil
 }
 ```
 
-../usecase/users.go
+../usecase/posts.go
 ```
 package usecase
 
@@ -78,62 +87,66 @@ import (
 	"errors"
 	"main/dao"
 	"main/model"
-
-	"github.com/google/uuid"
 )
 
-func GetUsers() ([]model.User, error) {
-	users, err := dao.GetUsers()
+func GetPosts() ([]model.Post, error) {
+	posts, err := dao.GetPosts()
 	if err != nil {
-		return nil, errors.New("Failed to get users")
+		return nil, errors.New("failed to get posts")
 	}
-	return users, nil
+	return posts, nil
 }
 
-func GetUser(id string) (model.User, error) {
-	user, err := dao.GetUser(id)
+func GetPost(id string) (model.Post, error) {
+	post, err := dao.GetPost(id)
 	if err != nil {
-		return model.User{}, errors.New("Failed to get user")
+		return model.Post{}, errors.New("failed to get post")
 	}
-	return user, nil
+	return post, nil
 }
 
-func CreateUser(user *model.User) error {
-	exists, err := dao.IsUsernameExists(user.Name)
+func CreatePost(post *model.Post) error {
+	userExists, err := dao.IsUserExists(post.PostedBy)
 	if err != nil {
-		return errors.New("Failed to check if username exists")
+		return errors.New("failed to check if user exists")
 	}
-	if exists {
-		return errors.New("Username already exists")
+	if !userExists {
+		return errors.New("user does not exist")
 	}
 
-	user.ID = uuid.New().String()
-	err = dao.CreateUser(user)
+	err = dao.CreatePost(post)
 	if err != nil {
-		return errors.New("Failed to create user")
+		return errors.New("failed to create post")
 	}
 	return nil
 }
 
-func UpdateUser(user *model.User) error {
-	err := dao.UpdateUser(user)
+func UpdatePost(post *model.Post) error {
+	err := dao.UpdatePost(post)
 	if err != nil {
-		return errors.New("Failed to update user")
+		return errors.New("failed to update post")
 	}
-
 	return nil
 }
 
-func DeleteUser(id string) error {
-	err := dao.DeleteUser(id)
+func DeletePost(id string) error {
+	err := dao.DeletePost(id)
 	if err != nil {
-		return errors.New("Failed to delete user")
+		return errors.New("failed to delete post")
 	}
 	return nil
+}
+
+func GetPostsByUser(userId string) ([]model.Post, error) {
+	posts, err := dao.GetPostsByUser(userId)
+	if err != nil {
+		return nil, errors.New("failed to get posts by user")
+	}
+	return posts, nil
 }
 ```
 
-../controller/users.go
+../controller/posts.go
 ```
 package controller
 
@@ -146,94 +159,111 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := usecase.GetUsers()
+func GetPosts(w http.ResponseWriter, r *http.Request) {
+	posts, err := usecase.GetPosts()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(posts)
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func GetPost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["userId"]
+	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
-	user, err := usecase.GetUser(id)
+	post, err := usecase.GetPost(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(post)
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user model.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+func CreatePost(w http.ResponseWriter, r *http.Request) {
+	var post model.Post
+	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = usecase.CreateUser(&user)
+	err = usecase.CreatePost(&post)
 	if err != nil {
-		if err.Error() == "Username already exists" {
-			http.Error(w, err.Error(), http.StatusConflict)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err.Error() == "user does not exist" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(post)
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["userId"]
+	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
-	var user model.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	var post model.Post
+	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	user.ID = id
-	err = usecase.UpdateUser(&user)
+	post.ID = id
+	err = usecase.UpdatePost(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(post)
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func DeletePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["userId"]
+	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
-	err := usecase.DeleteUser(id)
+	err := usecase.DeletePost(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userId := params["userId"]
+	if userId == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := usecase.GetPostsByUser(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(posts)
 }
 ```

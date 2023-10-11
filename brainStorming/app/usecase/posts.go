@@ -23,7 +23,15 @@ func GetPost(id string) (model.Post, error) {
 }
 
 func CreatePost(post *model.Post) error {
-	err := dao.CreatePost(post)
+	userExists, err := dao.IsUserExists(post.PostedBy)
+	if err != nil {
+		return errors.New("failed to check if user exists")
+	}
+	if !userExists {
+		return errors.New("user does not exist")
+	}
+
+	err = dao.CreatePost(post)
 	if err != nil {
 		return errors.New("failed to create post")
 	}

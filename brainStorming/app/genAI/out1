@@ -1,22 +1,8 @@
 1. dao package
-- Implement error handling for database operations in users.go
-- Implement functions for CRUD operations on posts
-- Implement function to check if a post exists in the database
+   - Add a function in users.go to check if a user exists by their ID.
 
-2. schema package
-- Update users.yml and posts.yml to include error responses
-- Add schemas for any additional data models needed
-- Update paths to include any additional endpoints needed
+2. usecase package
+   - Modify the CreatePost function in posts.go to call the new function from the dao package to check if the user exists before creating a new post.
 
-3. main package
-- Implement handlers for CRUD operations on posts
-- Implement middleware for error handling
-- Update main.go to include routes for any additional endpoints needed
-
-4. model package
-- Update User model to include any additional fields needed
-- Implement Post model with appropriate fields
-
-5. test package
-- Write unit tests for all new functions in the dao package
-- Write integration tests for all new endpoints in the main package
+3. controller package
+   - Modify the CreatePost function in posts.go to handle the error if the user does not exist when creating a new post.
