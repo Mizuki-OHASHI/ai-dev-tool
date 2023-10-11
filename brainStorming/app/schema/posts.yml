@@ -1,0 +1,85 @@
+openapi: 3.1.0
+info:
+  title: Post CRUD API
+  version: 1.0.0
+paths:
+  /posts:
+    get:
+      summary: Get a list of posts
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/model/Post"
+    post:
+      summary: Create a new post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/model/Post"
+      responses:
+        "201":
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/model/Post"
+  /posts/{postId}:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a post by ID
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/model/Post"
+    put:
+      summary: Update a post by ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/model/Post"
+      responses:
+        "200":
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/model/Post"
+    delete:
+      summary: Delete a post by ID
+      responses:
+        "204":
+          description: Post deleted successfully
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        posted_by:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+      required:
+        - posted_by
+        - title
+        - body
