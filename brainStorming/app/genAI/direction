@@ -1,1 +1,2 @@
-change code to distribute ID using google/uuid when creating a new user. edit code only related to user but post
+add feature: generate an user ID when creating a new user.
+add feature: preserve the uniqueness of the username when creating a new user.

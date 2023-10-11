@@ -1,21 +1,14 @@
-1. controller package
-   - Implement error handling for invalid user ID and post ID in the path parameters.
-   - Implement validation for the request body in the CreateUser, UpdateUser, CreatePost, and UpdatePost functions.
-   - Implement a function to handle requests to get a user's posts.
+1. dao
+- No changes needed
 
-2. dao package
-   - Implement error handling for database operations in the GetUsers, GetUser, CreateUser, UpdateUser, DeleteUser, GetPosts, GetPost, CreatePost, UpdatePost, DeletePost, and GetPostsByUser functions.
-   - Implement a function to get a user's posts from the database.
+2. usecase
+- Modify CreateUser function to generate a unique ID for the new user before calling dao.CreateUser
 
-3. usecase package
-   - Implement error handling for the GetUsers, GetUser, CreateUser, UpdateUser, DeleteUser, GetPosts, GetPost, CreatePost, UpdatePost, DeletePost, and GetPostsByUser functions.
-   - Implement a function to get a user's posts.
+3. controller
+- No changes needed
 
-4. model package
-   - Update the User and Post structs to match the database schema.
+4. model
+- No changes needed
 
-5. main package
-   - Update the routing to handle requests to get a user's posts.
-
-6. schema package
-   - Update the OpenAPI specification to include the endpoint to get a user's posts.
+5. main
+- No changes needed

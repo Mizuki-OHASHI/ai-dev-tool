@@ -61,7 +61,7 @@ func parseTaskList(outputFilePath string) []string {
 	input := string(file)
 
 	// 正規表現パターン
-	pattern := "([0-9]+)\\.\\s(.*)((\\n(\\s+)\\-\\s(.*))+)"
+	pattern := "([0-9]+)\\.\\s(.*)((\\n(\\s*)\\-\\s(.*))+)"
 
 	// 正規表現をコンパイル
 	re := regexp.MustCompile(pattern)

@@ -1,9 +1,9 @@
 package usecase
 
 import (
+	"errors"
 	"main/dao"
 	"main/model"
-	"errors"
 )
 
 func GetPosts() ([]model.Post, error) {

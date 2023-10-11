@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"errors"
 	"main/dao"
 	"main/model"
-	"errors"
+
+	"github.com/google/uuid"
 )
 
 func GetUsers() ([]model.User, error) {
@@ -23,6 +25,7 @@ func GetUser(id string) (model.User, error) {
 }
 
 func CreateUser(user *model.User) error {
+	user.ID = uuid.New().String()
 	err := dao.CreateUser(user)
 	if err != nil {
 		return errors.New("Failed to create user")
@@ -35,6 +38,7 @@ func UpdateUser(user *model.User) error {
 	if err != nil {
 		return errors.New("Failed to update user")
 	}
+
 	return nil
 }
 

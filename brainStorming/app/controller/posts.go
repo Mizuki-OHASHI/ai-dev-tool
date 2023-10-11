@@ -87,7 +87,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = usecase.DeletePost(id)
+	err := usecase.DeletePost(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

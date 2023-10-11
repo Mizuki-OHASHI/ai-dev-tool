@@ -1,426 +1,3 @@
-../controller/posts.go
-```
-package controller
-
-import (
-	"encoding/json"
-	"main/model"
-	"main/usecase"
-	"net/http"
-
-	"github.com/gorilla/mux"
-)
-
-func GetPosts(w http.ResponseWriter, r *http.Request) {
-	posts, err := usecase.GetPosts()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(posts)
-}
-
-func GetPost(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["postId"]
-	if id == "" {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
-		return
-	}
-
-	post, err := usecase.GetPost(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(post)
-}
-
-func CreatePost(w http.ResponseWriter, r *http.Request) {
-	var post model.Post
-	err := json.NewDecoder(r.Body).Decode(&post)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = usecase.CreatePost(&post)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(post)
-}
-
-func UpdatePost(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["postId"]
-	if id == "" {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
-		return
-	}
-
-	var post model.Post
-	err := json.NewDecoder(r.Body).Decode(&post)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	post.ID = id
-	err = usecase.UpdatePost(&post)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(post)
-}
-
-func DeletePost(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["postId"]
-	if id == "" {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
-		return
-	}
-
-	err = usecase.DeletePost(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	userId := params["userId"]
-	if userId == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	posts, err := usecase.GetPostsByUser(userId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(posts)
-}
-```
-
-../controller/users.go
-```
-package controller
-
-import (
-	"encoding/json"
-	"main/model"
-	"main/usecase"
-	"net/http"
-
-	"github.com/gorilla/mux"
-)
-
-func GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := usecase.GetUsers()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(users)
-}
-
-func GetUser(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["userId"]
-	if id == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	user, err := usecase.GetUser(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(user)
-}
-
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user model.User
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = usecase.CreateUser(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
-}
-
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["userId"]
-	if id == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	var user model.User
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	user.ID = id
-	err = usecase.UpdateUser(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(user)
-}
-
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["userId"]
-	if id == "" {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	err = usecase.DeleteUser(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-```
-
-../dao/posts.go
-```
-package dao
-
-import (
-	"main/model"
-	"errors"
-)
-
-func GetPosts() ([]model.Post, error) {
-	rows, err := Db.Query("SELECT * FROM posts")
-	if err != nil {
-		return nil, errors.New("Failed to fetch posts from database")
-	}
-	defer rows.Close()
-
-	var posts []model.Post
-	for rows.Next() {
-		var post model.Post
-		if err := rows.Scan(&post.ID, &post.PostedBy, &post.Title, &post.Body, &post.CreatedAt, &post.UpdatedAt); err != nil {
-			return nil, errors.New("Failed to scan post data")
-		}
-		posts = append(posts, post)
-	}
-
-	return posts, nil
-}
-
-func GetPost(id string) (model.Post, error) {
-	var post model.Post
-	err := Db.QueryRow("SELECT * FROM posts WHERE id = ?", id).Scan(&post.ID, &post.PostedBy, &post.Title, &post.Body, &post.CreatedAt, &post.UpdatedAt)
-	if err != nil {
-		return model.Post{}, errors.New("Failed to fetch post from database")
-	}
-
-	return post, nil
-}
-
-func CreatePost(post *model.Post) error {
-	_, err := Db.Exec("INSERT INTO posts (id, posted_by, title, body, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())", post.ID, post.PostedBy, post.Title, post.Body)
-	if err != nil {
-		return errors.New("Failed to insert post into database")
-	}
-	return nil
-}
-
-func UpdatePost(post *model.Post) error {
-	_, err := Db.Exec("UPDATE posts SET posted_by = ?, title = ?, body = ?, updated_at = NOW() WHERE id = ?", post.PostedBy, post.Title, post.Body, post.ID)
-	if err != nil {
-		return errors.New("Failed to update post in database")
-	}
-	return nil
-}
-
-func DeletePost(id string) error {
-	_, err := Db.Exec("DELETE FROM posts WHERE id = ?", id)
-	if err != nil {
-		return errors.New("Failed to delete post from database")
-	}
-	return nil
-}
-
-func GetPostsByUser(userId string) ([]model.Post, error) {
-	rows, err := Db.Query("SELECT * FROM posts WHERE posted_by = ?", userId)
-	if err != nil {
-		return nil, errors.New("Failed to fetch posts by user from database")
-	}
-	defer rows.Close()
-
-	var posts []model.Post
-	for rows.Next() {
-		var post model.Post
-		if err := rows.Scan(&post.ID, &post.PostedBy, &post.Title, &post.Body, &post.CreatedAt, &post.UpdatedAt); err != nil {
-			return nil, errors.New("Failed to scan post data")
-		}
-		posts = append(posts, post)
-	}
-
-	return posts, nil
-}
-```
-
-../dao/users.go
-```
-package dao
-
-import (
-	"main/model"
-	"errors"
-)
-
-func GetUsers() ([]model.User, error) {
-	rows, err := Db.Query("SELECT * FROM users")
-	if err != nil {
-		return nil, errors.New("Failed to fetch users from database")
-	}
-	defer rows.Close()
-
-	var users []model.User
-	for rows.Next() {
-		var user model.User
-		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt); err != nil {
-			return nil, errors.New("Failed to scan user data")
-		}
-		users = append(users, user)
-	}
-
-	return users, nil
-}
-
-func GetUser(id string) (model.User, error) {
-	var user model.User
-	err := Db.QueryRow("SELECT * FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
-	if err != nil {
-		return model.User{}, errors.New("Failed to fetch user from database")
-	}
-
-	return user, nil
-}
-
-func CreateUser(user *model.User) error {
-	_, err := Db.Exec("INSERT INTO users (id, name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())", user.ID, user.Name, user.Email, user.Password)
-	if err != nil {
-		return errors.New("Failed to insert user into database")
-	}
-	return nil
-}
-
-func UpdateUser(user *model.User) error {
-	_, err := Db.Exec("UPDATE users SET name = ?, email = ?, password = ?, updated_at = NOW() WHERE id = ?", user.Name, user.Email, user.Password, user.ID)
-	if err != nil {
-		return errors.New("Failed to update user in database")
-	}
-	return nil
-}
-
-func DeleteUser(id string) error {
-	_, err := Db.Exec("DELETE FROM users WHERE id = ?", id)
-	if err != nil {
-		return errors.New("Failed to delete user from database")
-	}
-	return nil
-}
-```
-
-../usecase/posts.go
-```
-package usecase
-
-import (
-	"main/dao"
-	"main/model"
-	"errors"
-)
-
-func GetPosts() ([]model.Post, error) {
-	posts, err := dao.GetPosts()
-	if err != nil {
-		return nil, errors.New("Failed to get posts")
-	}
-	return posts, nil
-}
-
-func GetPost(id string) (model.Post, error) {
-	post, err := dao.GetPost(id)
-	if err != nil {
-		return model.Post{}, errors.New("Failed to get post")
-	}
-	return post, nil
-}
-
-func CreatePost(post *model.Post) error {
-	err := dao.CreatePost(post)
-	if err != nil {
-		return errors.New("Failed to create post")
-	}
-	return nil
-}
-
-func UpdatePost(post *model.Post) error {
-	err := dao.UpdatePost(post)
-	if err != nil {
-		return errors.New("Failed to update post")
-	}
-	return nil
-}
-
-func DeletePost(id string) error {
-	err := dao.DeletePost(id)
-	if err != nil {
-		return errors.New("Failed to delete post")
-	}
-	return nil
-}
-
-func GetPostsByUser(userId string) ([]model.Post, error) {
-	posts, err := dao.GetPostsByUser(userId)
-	if err != nil {
-		return nil, errors.New("Failed to get posts by user")
-	}
-	return posts, nil
-}
-```
-
 ../usecase/users.go
 ```
 package usecase
@@ -429,6 +6,7 @@ import (
 	"main/dao"
 	"main/model"
 	"errors"
+	"github.com/google/uuid"
 )
 
 func GetUsers() ([]model.User, error) {
@@ -448,6 +26,7 @@ func GetUser(id string) (model.User, error) {
 }
 
 func CreateUser(user *model.User) error {
+	user.ID = uuid.New().String()
 	err := dao.CreateUser(user)
 	if err != nil {
 		return errors.New("Failed to create user")
@@ -472,136 +51,61 @@ func DeleteUser(id string) error {
 }
 ```
 
-../model/posts.go
+../usecase/users.go
 ```
-package model
-
-type Post struct {
-	ID        string `json:"id"`
-	PostedBy  string `json:"posted_by"`
-	Title     string `json:"title"`
-	Body      string `json:"body"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-}
-```
-
-../model/users.go
-```
-package model
-
-type User struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-}
-```
-
-../main.go
-```
-package main
+package usecase
 
 import (
-	"fmt"
-	"log"
-	"main/controller"
 	"main/dao"
-	"net/http"
-	"os"
-
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
+	"main/model"
+	"errors"
+	"github.com/google/uuid"
 )
 
-func main() {
-	dao.CloseDBWithSysCall()
-
-	r := mux.NewRouter()
-	r.HandleFunc("/users", controller.GetUsers).Methods("GET")
-	r.HandleFunc("/users", controller.CreateUser).Methods("POST")
-	r.HandleFunc("/users/{userId}", controller.GetUser).Methods("GET")
-	r.HandleFunc("/users/{userId}", controller.UpdateUser).Methods("PUT")
-	r.HandleFunc("/users/{userId}", controller.DeleteUser).Methods("DELETE")
-	r.HandleFunc("/posts", controller.GetPosts).Methods("GET")
-	r.HandleFunc("/posts", controller.CreatePost).Methods("POST")
-	r.HandleFunc("/posts/{postId}", controller.GetPost).Methods("GET")
-	r.HandleFunc("/posts/{postId}", controller.UpdatePost).Methods("PUT")
-	r.HandleFunc("/posts/{postId}", controller.DeletePost).Methods("DELETE")
-	r.HandleFunc("/users/{userId}/posts", controller.GetPostsByUser).Methods("GET")
-
-	log.Printf("Listening...")
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+func GetUsers() ([]model.User, error) {
+	users, err := dao.GetUsers()
+	if err != nil {
+		return nil, errors.New("Failed to get users")
 	}
-
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), r); err != nil {
-		log.Fatal(err)
-	}
+	return users, nil
 }
 
-func init() {
-
-	if err := godotenv.Load(".env"); err != nil {
-		log.Printf("fail: godotenv.Load, %v\n", err)
+func GetUser(id string) (model.User, error) {
+	user, err := dao.GetUser(id)
+	if err != nil {
+		return model.User{}, errors.New("Failed to get user")
 	}
+	return user, nil
+}
 
-	dao.OpenSql()
+func CreateUser(user *model.User) error {
+	user.ID = uuid.New().String()
+	err := dao.CreateUser(user)
+	if err != nil {
+		return errors.New("Failed to create user")
+	}
+	return nil
+}
+
+func UpdateUser(user *model.User) error {
+	err := dao.UpdateUser(user)
+	if err != nil {
+		return errors.New("Failed to update user")
+	}
+	return nil
+}
+
+func DeleteUser(id string) error {
+	err := dao.DeleteUser(id)
+	if err != nil {
+		return errors.New("Failed to delete user")
+	}
+	return nil
 }
 ```
 
-../schema/posts.yml
-```
-openapi: 3.1.0
-info:
-  title: Post CRUD API
-  version: 1.0.0
-paths:
-  /posts:
-    get:
-      summary: Get a list of posts
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/model/Post"
-    post:
-      summary: Create a new post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/model/Post"
-      responses:
-        "201":
-          description: Post created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/model/Post"
-  /posts/{postId}:
-    parameters:
-      - name: postId
-        in: path
-        required: true
-        schema:
-          type: string
-    get:
-      summary: Get a post by ID
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: "#/model/Post"
-   
+Since there are no changes needed in the controller, there is no new code to generate. The existing code in the controller does not need to be modified to implement the new feature.
+
+Since there are no changes needed in the model, there is no new code to generate. The existing code in the model does not need to be modified to implement the new feature.
+
+Since there are no changes needed in the main, there is no new code to generate. The existing code in the main does not need to be modified to implement the new feature.
