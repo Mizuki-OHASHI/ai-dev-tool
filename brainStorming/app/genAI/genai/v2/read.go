@@ -1,4 +1,4 @@
-package genai
+package v2
 
 import (
 	"bufio"
