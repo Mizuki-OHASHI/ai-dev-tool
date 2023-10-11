@@ -1,14 +1,8 @@
-1. dao
-- No changes needed
+1. dao package
+   - Add a function to check if a username already exists in the database.
 
-2. usecase
-- Modify CreateUser function to generate a unique ID for the new user before calling dao.CreateUser
+2. usecase package
+   - Modify the CreateUser function to call the new function in the dao package to check if the username already exists before creating a new user.
 
-3. controller
-- No changes needed
-
-4. model
-- No changes needed
-
-5. main
-- No changes needed
+3. controller package
+   - Modify the CreateUser function to handle the error if the username already exists and return an appropriate HTTP response.

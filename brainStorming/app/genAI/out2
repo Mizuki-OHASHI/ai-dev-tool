@@ -1,11 +1,84 @@
+../dao/users.go
+```
+package dao
+
+import (
+	"main/model"
+	"errors"
+)
+
+func GetUsers() ([]model.User, error) {
+	rows, err := Db.Query("SELECT * FROM users")
+	if err != nil {
+		return nil, errors.New("Failed to fetch users from database")
+	}
+	defer rows.Close()
+
+	var users []model.User
+	for rows.Next() {
+		var user model.User
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt); err != nil {
+			return nil, errors.New("Failed to scan user data")
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func GetUser(id string) (model.User, error) {
+	var user model.User
+	err := Db.QueryRow("SELECT * FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		return model.User{}, errors.New("Failed to fetch user from database")
+	}
+
+	return user, nil
+}
+
+func CreateUser(user *model.User) error {
+	_, err := Db.Exec("INSERT INTO users (id, name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())", user.ID, user.Name, user.Email, user.Password)
+	if err != nil {
+		return errors.New("Failed to insert user into database")
+	}
+	return nil
+}
+
+func UpdateUser(user *model.User) error {
+	_, err := Db.Exec("UPDATE users SET name = ?, email = ?, password = ?, updated_at = NOW() WHERE id = ?", user.Name, user.Email, user.Password, user.ID)
+	if err != nil {
+		return errors.New("Failed to update user in database")
+	}
+	return nil
+}
+
+func DeleteUser(id string) error {
+	_, err := Db.Exec("DELETE FROM users WHERE id = ?", id)
+	if err != nil {
+		return errors.New("Failed to delete user from database")
+	}
+	return nil
+}
+
+func IsUsernameExists(username string) (bool, error) {
+	var exists bool
+	err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE name=?)", username).Scan(&exists)
+	if err != nil {
+		return false, errors.New("Failed to check if username exists in database")
+	}
+	return exists, nil
+}
+```
+
 ../usecase/users.go
 ```
 package usecase
 
 import (
+	"errors"
 	"main/dao"
 	"main/model"
-	"errors"
+
 	"github.com/google/uuid"
 )
 
@@ -26,8 +99,16 @@ func GetUser(id string) (model.User, error) {
 }
 
 func CreateUser(user *model.User) error {
+	exists, err := dao.IsUsernameExists(user.Name)
+	if err != nil {
+		return errors.New("Failed to check if username exists")
+	}
+	if exists {
+		return errors.New("Username already exists")
+	}
+
 	user.ID = uuid.New().String()
-	err := dao.CreateUser(user)
+	err = dao.CreateUser(user)
 	if err != nil {
 		return errors.New("Failed to create user")
 	}
@@ -39,6 +120,7 @@ func UpdateUser(user *model.User) error {
 	if err != nil {
 		return errors.New("Failed to update user")
 	}
+
 	return nil
 }
 
@@ -51,61 +133,107 @@ func DeleteUser(id string) error {
 }
 ```
 
-../usecase/users.go
+../controller/users.go
 ```
-package usecase
+package controller
 
 import (
-	"main/dao"
+	"encoding/json"
 	"main/model"
-	"errors"
-	"github.com/google/uuid"
+	"main/usecase"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func GetUsers() ([]model.User, error) {
-	users, err := dao.GetUsers()
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := usecase.GetUsers()
 	if err != nil {
-		return nil, errors.New("Failed to get users")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	return users, nil
+
+	json.NewEncoder(w).Encode(users)
 }
 
-func GetUser(id string) (model.User, error) {
-	user, err := dao.GetUser(id)
-	if err != nil {
-		return model.User{}, errors.New("Failed to get user")
+func GetUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
 	}
-	return user, nil
+
+	user, err := usecase.GetUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
 }
 
-func CreateUser(user *model.User) error {
-	user.ID = uuid.New().String()
-	err := dao.CreateUser(user)
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	var user model.User
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		return errors.New("Failed to create user")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
-	return nil
+
+	err = usecase.CreateUser(&user)
+	if err != nil {
+		if err.Error() == "Username already exists" {
+			http.Error(w, err.Error(), http.StatusConflict)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(user)
 }
 
-func UpdateUser(user *model.User) error {
-	err := dao.UpdateUser(user)
-	if err != nil {
-		return errors.New("Failed to update user")
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
 	}
-	return nil
+
+	var user model.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user.ID = id
+	err = usecase.UpdateUser(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
 }
 
-func DeleteUser(id string) error {
-	err := dao.DeleteUser(id)
-	if err != nil {
-		return errors.New("Failed to delete user")
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
 	}
-	return nil
+
+	err := usecase.DeleteUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 ```
-
-Since there are no changes needed in the controller, there is no new code to generate. The existing code in the controller does not need to be modified to implement the new feature.
-
-Since there are no changes needed in the model, there is no new code to generate. The existing code in the model does not need to be modified to implement the new feature.
-
-Since there are no changes needed in the main, there is no new code to generate. The existing code in the main does not need to be modified to implement the new feature.

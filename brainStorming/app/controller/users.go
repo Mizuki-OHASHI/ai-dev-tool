@@ -46,7 +46,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	err = usecase.CreateUser(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err.Error() == "Username already exists" {
+			http.Error(w, err.Error(), http.StatusConflict)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 

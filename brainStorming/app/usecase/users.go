@@ -25,8 +25,16 @@ func GetUser(id string) (model.User, error) {
 }
 
 func CreateUser(user *model.User) error {
+	exists, err := dao.IsUsernameExists(user.Name)
+	if err != nil {
+		return errors.New("Failed to check if username exists")
+	}
+	if exists {
+		return errors.New("Username already exists")
+	}
+
 	user.ID = uuid.New().String()
-	err := dao.CreateUser(user)
+	err = dao.CreateUser(user)
 	if err != nil {
 		return errors.New("Failed to create user")
 	}

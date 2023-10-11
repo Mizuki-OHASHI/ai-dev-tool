@@ -57,3 +57,12 @@ func DeleteUser(id string) error {
 	}
 	return nil
 }
+
+func IsUsernameExists(username string) (bool, error) {
+	var exists bool
+	err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE name=?)", username).Scan(&exists)
+	if err != nil {
+		return false, errors.New("Failed to check if username exists in database")
+	}
+	return exists, nil
+}
