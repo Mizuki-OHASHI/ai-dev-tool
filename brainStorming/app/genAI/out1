@@ -1,16 +1,21 @@
-1. controller
-   - Implement handler functions for each endpoint defined in the API (GET, POST, PUT, DELETE for /users and /users/{userId}).
-   - Parse request body and parameters, call the appropriate usecase function, and format the response.
+1. controller package
+   - Implement a controller for handling post related requests. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
+   - Implement a controller for getting all posts by a specific user.
 
-2. dao
-   - Implement functions to interact with the database. These should include functions to get a list of users, get a user by ID, create a new user, update a user, and delete a user.
+2. dao package
+   - Implement a data access object (DAO) for interacting with the posts table in the database. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
+   - Implement a DAO method for getting all posts by a specific user.
 
-3. model
-   - The User struct is already defined according to the database schema. No further features need to be implemented in this package.
+3. model package
+   - No new features need to be implemented in the model package as the Post struct is already defined.
 
-4. usecase
-   - Implement functions that use the dao to perform operations related to the business logic. These should include functions to get a list of users, get a user by ID, create a new user, update a user, and delete a user. Each function should take the necessary parameters, call the appropriate dao function, and return the result.
+4. main package
+   - Add new routes for handling post related requests. This includes routes for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
+   - Add a new route for getting all posts by a specific user.
 
-5. main
-   - Set up routes for each endpoint defined in the API, associating each route with the appropriate handler function from the controller.
-   - Handle any necessary server setup and teardown, such as loading environment variables and opening and closing the database connection.
+5. schema package
+   - No new features need to be implemented in the schema package as the database schema for the posts table is already defined.
+
+6. usecase package
+   - Implement a use case for handling post related requests. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
+   - Implement a use case for getting all posts by a specific user.
