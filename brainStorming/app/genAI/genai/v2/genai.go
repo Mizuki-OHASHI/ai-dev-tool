@@ -16,6 +16,7 @@ var (
 	newMessages   []openai.ChatCompletionMessage
 	readFiles     []string
 	ignoreFiles   []string
+	readFilesAll  []string
 	selectedFiles []string
 )
 

@@ -3,28 +3,53 @@ package usecase
 import (
 	"main/dao"
 	"main/model"
+	"errors"
 )
 
 func GetPosts() ([]model.Post, error) {
-	return dao.GetPosts()
+	posts, err := dao.GetPosts()
+	if err != nil {
+		return nil, errors.New("Failed to get posts")
+	}
+	return posts, nil
 }
 
 func GetPost(id string) (model.Post, error) {
-	return dao.GetPost(id)
+	post, err := dao.GetPost(id)
+	if err != nil {
+		return model.Post{}, errors.New("Failed to get post")
+	}
+	return post, nil
 }
 
 func CreatePost(post *model.Post) error {
-	return dao.CreatePost(post)
+	err := dao.CreatePost(post)
+	if err != nil {
+		return errors.New("Failed to create post")
+	}
+	return nil
 }
 
 func UpdatePost(post *model.Post) error {
-	return dao.UpdatePost(post)
+	err := dao.UpdatePost(post)
+	if err != nil {
+		return errors.New("Failed to update post")
+	}
+	return nil
 }
 
 func DeletePost(id string) error {
-	return dao.DeletePost(id)
+	err := dao.DeletePost(id)
+	if err != nil {
+		return errors.New("Failed to delete post")
+	}
+	return nil
 }
 
 func GetPostsByUser(userId string) ([]model.Post, error) {
-	return dao.GetPostsByUser(userId)
+	posts, err := dao.GetPostsByUser(userId)
+	if err != nil {
+		return nil, errors.New("Failed to get posts by user")
+	}
+	return posts, nil
 }

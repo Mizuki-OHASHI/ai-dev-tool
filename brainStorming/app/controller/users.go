@@ -21,15 +21,9 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	// id, err := strconv.Atoi(params["userId"])
-	// if err != nil {
-	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-	// 	return
-	// }
-	var err error
 	id := params["userId"]
 	if id == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
@@ -62,20 +56,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	// id, err := strconv.Atoi(params["userId"])
-	// if err != nil {
-	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-	// 	return
-	// }
-	var err error
 	id := params["userId"]
 	if id == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
 	var user model.User
-	err = json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -93,15 +81,9 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	// id, err := strconv.Atoi(params["userId"])
-	// if err != nil {
-	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-	// 	return
-	// }
-	var err error
 	id := params["userId"]
 	if id == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 

@@ -37,6 +37,7 @@ func addFiles() error {
 
 func addFileContent(filePath string, messages_ *[]openai.ChatCompletionMessage) error {
 	fmt.Println(filePath)
+	readFilesAll = append(readFilesAll, filePath)
 	file, err := os.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)

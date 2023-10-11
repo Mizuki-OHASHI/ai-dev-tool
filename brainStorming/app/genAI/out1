@@ -1,21 +1,21 @@
 1. controller package
-   - Implement a controller for handling post related requests. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Implement a controller for getting all posts by a specific user.
+   - Implement error handling for invalid user ID and post ID in the path parameters.
+   - Implement validation for the request body in the CreateUser, UpdateUser, CreatePost, and UpdatePost functions.
+   - Implement a function to handle requests to get a user's posts.
 
 2. dao package
-   - Implement a data access object (DAO) for interacting with the posts table in the database. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Implement a DAO method for getting all posts by a specific user.
+   - Implement error handling for database operations in the GetUsers, GetUser, CreateUser, UpdateUser, DeleteUser, GetPosts, GetPost, CreatePost, UpdatePost, DeletePost, and GetPostsByUser functions.
+   - Implement a function to get a user's posts from the database.
 
-3. model package
-   - No new features need to be implemented in the model package as the Post struct is already defined.
+3. usecase package
+   - Implement error handling for the GetUsers, GetUser, CreateUser, UpdateUser, DeleteUser, GetPosts, GetPost, CreatePost, UpdatePost, DeletePost, and GetPostsByUser functions.
+   - Implement a function to get a user's posts.
 
-4. main package
-   - Add new routes for handling post related requests. This includes routes for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Add a new route for getting all posts by a specific user.
+4. model package
+   - Update the User and Post structs to match the database schema.
 
-5. schema package
-   - No new features need to be implemented in the schema package as the database schema for the posts table is already defined.
+5. main package
+   - Update the routing to handle requests to get a user's posts.
 
-6. usecase package
-   - Implement a use case for handling post related requests. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Implement a use case for getting all posts by a specific user.
+6. schema package
+   - Update the OpenAPI specification to include the endpoint to get a user's posts.

@@ -21,10 +21,9 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 
 func GetPost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	var err error
 	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Empty post ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
@@ -57,15 +56,14 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	var err error
 	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Empty post ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
 	var post model.Post
-	err = json.NewDecoder(r.Body).Decode(&post)
+	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -83,10 +81,9 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	var err error
 	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Empty post ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
@@ -101,10 +98,9 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 
 func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	var err error
 	userId := params["userId"]
 	if userId == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
