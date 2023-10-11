@@ -1,2 +1,3 @@
 add feature: generate an user ID when creating a new user.
 add feature: preserve the uniqueness of the username when creating a new user.
+debug: error strings should not be capitalized

@@ -1,8 +1,22 @@
 1. dao package
-   - Add a function to check if a username already exists in the database.
+- Implement error handling for database operations in users.go
+- Implement functions for CRUD operations on posts
+- Implement function to check if a post exists in the database
 
-2. usecase package
-   - Modify the CreateUser function to call the new function in the dao package to check if the username already exists before creating a new user.
+2. schema package
+- Update users.yml and posts.yml to include error responses
+- Add schemas for any additional data models needed
+- Update paths to include any additional endpoints needed
 
-3. controller package
-   - Modify the CreateUser function to handle the error if the username already exists and return an appropriate HTTP response.
+3. main package
+- Implement handlers for CRUD operations on posts
+- Implement middleware for error handling
+- Update main.go to include routes for any additional endpoints needed
+
+4. model package
+- Update User model to include any additional fields needed
+- Implement Post model with appropriate fields
+
+5. test package
+- Write unit tests for all new functions in the dao package
+- Write integration tests for all new endpoints in the main package
