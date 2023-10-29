@@ -10,6 +10,7 @@ import (
 )
 
 func GetPosts(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	posts, err := usecase.GetPosts()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -20,6 +21,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
 	id := params["postId"]
 	if id == "" {
@@ -37,6 +39,7 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	var post model.Post
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
@@ -59,6 +62,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
 	id := params["postId"]
 	if id == "" {
@@ -84,6 +88,7 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
 	id := params["postId"]
 	if id == "" {
@@ -101,6 +106,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
 	userId := params["userId"]
 	if userId == "" {

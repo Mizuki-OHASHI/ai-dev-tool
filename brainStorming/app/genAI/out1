@@ -1,8 +1,8 @@
-1. dao package
-   - Add a function in users.go to check if a user exists by their ID.
-
-2. usecase package
-   - Modify the CreatePost function in posts.go to call the new function from the dao package to check if the user exists before creating a new post.
-
-3. controller package
-   - Modify the CreatePost function in posts.go to handle the error if the user does not exist when creating a new post.
+1. controller package
+- Add logging functionality to record incoming requests in posts.go
+- Add logging functionality to record incoming requests in users.go
+- Ensure logs capture important request information such as method, URL, and possibly body content
+- Ensure logs are written in a consistent, readable format
+- Ensure logs are written to a location that can be easily accessed and monitored
+- Handle any errors that may occur during the logging process to prevent disruption of the main application flow
+- Test the logging functionality to ensure it works as expected

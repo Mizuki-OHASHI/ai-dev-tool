@@ -3,5 +3,4 @@ add feature: preserve the uniqueness of the username when creating a new user.
 debug: error strings should not be capitalized
 add feature: get also user name when getting posts
 add feature: generate an post ID when creating a new post.
-add feature: check if the user (postedBy) exists when creating a new post. これではうまくいかない (/dao/users.go が捨てられる)
-add feature: check if the user (postedBy) exists when creating a new post. (Cf. ../dao/users.go)
+change feature: require password when deleting a user.

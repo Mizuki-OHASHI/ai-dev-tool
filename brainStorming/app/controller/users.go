@@ -10,6 +10,7 @@ import (
 )
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	users, err := usecase.GetUsers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -20,6 +21,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
 	id := params["userId"]
 	if id == "" {
@@ -37,6 +39,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	var user model.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -59,6 +62,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
 	id := params["userId"]
 	if id == "" {
@@ -84,6 +88,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
 	id := params["userId"]
 	if id == "" {
