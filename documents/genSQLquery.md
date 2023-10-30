@@ -14,7 +14,10 @@
   - [3.2. Problem 2: Simple Query 2 (3 tables, 1 constraints)](#32-problem-2-simple-query-2-3-tables-1-constraints)
   - [3.3. Problem 3: Basic Query 1 (5 tables, 2 constraints)](#33-problem-3-basic-query-1-5-tables-2-constraints)
   - [3.4. Problem 4: Basic Query 2 (4 tables, 2 complex constraints)](#34-problem-4-basic-query-2-4-tables-2-complex-constraints)
-  - [3.5 Pre-Discussion](#35-pre-discussion)
+  - [3.5 Summary of Problems 1-4](#35-summary-of-problems-1-4)
+  - [3.6. Problem 5: Query with Calculations 1](#36-problem-5-query-with-calculations-1)
+  - [3.7. Problem 6: Query with Calculations 2](#37-problem-6-query-with-calculations-2)
+  - [3.8. Summary of Problems 5-6](#38-summary-of-problems-5-6)
 
 <!-- /code_chunk_output -->
 
@@ -215,6 +218,98 @@ mysql> SELECT p.productName
 213 rows in set (0.06 sec)
 ```
 
-### 3.5 Pre-Discussion
+### 3.5 Summary of Problems 1-4
 
-The results suggests that LLM can generate SQL queries from natural language queries even if the queries are complicated to a certain degree.
+The results suggests that LLM can generate SQL queries with multiple tables from natural language queries even if the queries are complicated to a certain degree.
+
+### 3.6. Problem 5: Query with Calculations 1
+
+Prompt:
+
+````plaintext
+The table definitions for MySQL can be found in the "createTable.sql" file.
+Instruction: Compose a query in order to show the most ordered product and the number of orders on July, 2003.
+Output Format: Please use the following format "```sql\n...```".
+````
+
+Response:
+
+```sql
+SELECT p.productName, COUNT(*) AS total_orders
+FROM products p
+JOIN orderdetails od ON p.productCode = od.productCode
+JOIN orders o ON od.orderNumber = o.orderNumber
+WHERE o.orderDate BETWEEN '2003-07-01' AND '2003-07-31'
+GROUP BY p.productCode
+ORDER BY total_orders DESC
+LIMIT 1;
+```
+
+The response above works:
+
+```plaintext
+mysql> SELECT p.productName, COUNT(*) AS total_orders
+    -> FROM products p
+    -> JOIN orderdetails od ON p.productCode = od.productCode
+    -> JOIN orders o ON od.orderNumber = o.orderNumber
+    -> WHERE o.orderDate BETWEEN '2003-07-01' AND '2003-07-31'
+    -> GROUP BY p.productCode
+    -> ORDER BY total_orders DESC
+    -> LIMIT 1;
++---------------------------------------+--------------+
+| productName                           | total_orders |
++---------------------------------------+--------------+
+| 1969 Harley Davidson Ultimate Chopper |            1 |
++---------------------------------------+--------------+
+1 row in set (0.07 sec)
+```
+
+Note that no product was ordered more than once in July, 2003.
+
+### 3.7. Problem 6: Query with Calculations 2
+
+Prompt:
+
+````plaintext
+The table definitions for MySQL can be found in the "createTable.sql" file.
+Instruction: Compose a query in order to show the most sold products and its total sales in terms of total sales whose product line is Classic Cars in the early half of 2003.
+Output Format: Please use the following format "```sql\n...```".
+````
+
+Response:
+
+```sql
+SELECT p.productName, SUM(od.quantityOrdered * od.priceEach) AS total_sales
+FROM products p
+JOIN orderdetails od ON p.productCode = od.productCode
+JOIN orders o ON od.orderNumber = o.orderNumber
+WHERE p.productLine = 'Classic Cars'
+AND o.orderDate BETWEEN '2003-01-01' AND '2003-06-30'
+GROUP BY p.productCode
+ORDER BY total_sales DESC
+LIMIT 1;
+```
+
+The response above works:
+
+```plaintext
+mysql> SELECT p.productName, SUM(od.quantityOrdered * od.priceEach) AS total_sales
+    -> FROM products p
+    -> JOIN orderdetails od ON p.productCode = od.productCode
+    -> JOIN orders o ON od.orderNumber = o.orderNumber
+    -> WHERE p.productLine = 'Classic Cars'
+    -> AND o.orderDate BETWEEN '2003-01-01' AND '2003-06-30'
+    -> GROUP BY p.productCode
+    -> ORDER BY total_sales DESC
+    -> LIMIT 1;
++-----------------------------+-------------+
+| productName                 | total_sales |
++-----------------------------+-------------+
+| 1992 Ferrari 360 Spider red |    26052.88 |
++-----------------------------+-------------+
+1 row in set (0.08 sec)
+```
+
+### 3.8. Summary of Problems 5-6
+
+The results suggests that LLM can generate SQL queries including plain calculations from natural language queries.
