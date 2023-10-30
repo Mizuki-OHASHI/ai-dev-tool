@@ -18,6 +18,7 @@
   - [3.6. Problem 5: Query with Calculations 1](#36-problem-5-query-with-calculations-1)
   - [3.7. Problem 6: Query with Calculations 2](#37-problem-6-query-with-calculations-2)
   - [3.8. Summary of Problems 5-6](#38-summary-of-problems-5-6)
+  - [4. Next Steps](#4-next-steps)
 
 <!-- /code_chunk_output -->
 
@@ -313,3 +314,7 @@ mysql> SELECT p.productName, SUM(od.quantityOrdered * od.priceEach) AS total_sal
 ### 3.8. Summary of Problems 5-6
 
 The results suggests that LLM can generate SQL queries including plain calculations from natural language queries.
+
+### 4. Next Steps
+
+The results of section 3 suggest that LLM can generate SQL queries from natural language queries. The next step is to test LLM's ability to generate SQL queries embedded in the dao package written in Go.
