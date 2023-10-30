@@ -10,6 +10,7 @@ import (
 )
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	users, err := usecase.GetUsers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -20,16 +21,11 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
-	// id, err := strconv.Atoi(params["userId"])
-	// if err != nil {
-	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-	// 	return
-	// }
-	var err error
 	id := params["userId"]
 	if id == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
@@ -43,6 +39,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	var user model.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -52,7 +49,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	err = usecase.CreateUser(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err.Error() == "Username already exists" {
+			http.Error(w, err.Error(), http.StatusConflict)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -61,21 +62,16 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
-	// id, err := strconv.Atoi(params["userId"])
-	// if err != nil {
-	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-	// 	return
-	// }
-	var err error
 	id := params["userId"]
 	if id == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
 	var user model.User
-	err = json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -92,20 +88,15 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
-	// id, err := strconv.Atoi(params["userId"])
-	// if err != nil {
-	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-	// 	return
-	// }
-	var err error
 	id := params["userId"]
 	if id == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
-	err = usecase.DeleteUser(id)
+	err := usecase.DeleteUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

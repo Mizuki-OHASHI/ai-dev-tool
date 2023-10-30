@@ -26,7 +26,7 @@ func main() {
 	r.HandleFunc("/posts/{postId}", controller.GetPost).Methods("GET")
 	r.HandleFunc("/posts/{postId}", controller.UpdatePost).Methods("PUT")
 	r.HandleFunc("/posts/{postId}", controller.DeletePost).Methods("DELETE")
-	r.HandleFunc("/users/posts/{userId}", controller.GetPostsByUser).Methods("GET")
+	r.HandleFunc("/users/{userId}/posts", controller.GetPostsByUser).Methods("GET")
 
 	log.Printf("Listening...")
 

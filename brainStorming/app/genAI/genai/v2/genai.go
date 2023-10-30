@@ -16,6 +16,7 @@ var (
 	newMessages   []openai.ChatCompletionMessage
 	readFiles     []string
 	ignoreFiles   []string
+	readFilesAll  []string
 	selectedFiles []string
 )
 
@@ -30,12 +31,12 @@ func makeMessagesListedFiles() error {
 func makeMessagesToBrainStorm() error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "List the concrete features to be implemented for each package by comparing the definition of api and database with the existing code, following the direction. ",
+		Content: "List the additional features to be satisfied direction. ",
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Generate task list with following style: `1. <package1>\n 2. <package2>\n...` ",
+		Content: "Generate task list with following style: `1. <package1>\n- ...\n- ...\n 2. <package2>\n- ...\n- ... \n...` ",
 	})
 	return nil
 }
@@ -50,7 +51,7 @@ func makeMessagesToSelectFile(direction string, filePath string) ([]openai.ChatC
 
 	newMessages = append(newMessages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: fmt.Sprintf("Will %s be neccesary to generate code according to the above direction? (y/n)", filePath),
+		Content: fmt.Sprintf("Will %s need to be modified or to be referred when generating code? (y/n)", filePath),
 	})
 
 	return newMessages, nil
@@ -59,7 +60,7 @@ func makeMessagesToSelectFile(direction string, filePath string) ([]openai.ChatC
 func makeMessagesToGenerateCodeWithTask(task string) error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "Based on the above directory structure, file contents, generate a whole code to implement the features bellow. ",
+		Content: "Based on the above directory structure, file contents, generate a whole code to implement the features bellow. Do not omits. ",
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
@@ -84,6 +85,8 @@ func makeMessagesToAddDirection(direction string) error {
 }
 
 func GenAI(direction string) {
+	fmt.Println("GenAI v2\ndirection: ", direction)
+
 	var err error
 
 	readFiles, err = makeReadList()

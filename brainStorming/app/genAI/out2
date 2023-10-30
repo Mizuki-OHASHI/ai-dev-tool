@@ -4,6 +4,7 @@ package controller
 
 import (
 	"encoding/json"
+	"log"
 	"main/model"
 	"main/usecase"
 	"net/http"
@@ -11,7 +12,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func logRequest(r *http.Request) {
+	log.Printf("Received request: %s %s", r.Method, r.URL)
+}
+
 func GetPosts(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	posts, err := usecase.GetPosts()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -22,11 +28,11 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
-	var err error
 	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Empty post ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
@@ -40,6 +46,7 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	var post model.Post
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
@@ -49,6 +56,10 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	err = usecase.CreatePost(&post)
 	if err != nil {
+		if err.Error() == "user does not exist" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -58,16 +69,16 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
-	var err error
 	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Empty post ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
 	var post model.Post
-	err = json.NewDecoder(r.Body).Decode(&post)
+	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -84,15 +95,15 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
-	var err error
 	id := params["postId"]
 	if id == "" {
-		http.Error(w, "Empty post ID", http.StatusBadRequest)
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
-	err = usecase.DeletePost(id)
+	err := usecase.DeletePost(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -102,11 +113,11 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 	params := mux.Vars(r)
-	var err error
 	userId := params["userId"]
 	if userId == "" {
-		http.Error(w, "Empty user ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
@@ -120,166 +131,117 @@ func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-../dao/posts.go
+../controller/users.go
 ```
-package dao
-
-import "main/model"
-
-func GetPosts() ([]model.Post, error) {
-	rows, err := Db.Query("SELECT * FROM posts")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []model.Post
-	for rows.Next() {
-		var post model.Post
-		if err := rows.Scan(&post.ID, &post.PostedBy, &post.Title, &post.Body, &post.CreatedAt, &post.UpdatedAt); err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-
-	return posts, nil
-}
-
-func GetPost(id string) (model.Post, error) {
-	var post model.Post
-	err := Db.QueryRow("SELECT * FROM posts WHERE id = ?", id).Scan(&post.ID, &post.PostedBy, &post.Title, &post.Body, &post.CreatedAt, &post.UpdatedAt)
-	if err != nil {
-		return model.Post{}, err
-	}
-
-	return post, nil
-}
-
-func CreatePost(post *model.Post) error {
-	_, err := Db.Exec("INSERT INTO posts (id, posted_by, title, body, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())", post.ID, post.PostedBy, post.Title, post.Body)
-	return err
-}
-
-func UpdatePost(post *model.Post) error {
-	_, err := Db.Exec("UPDATE posts SET posted_by = ?, title = ?, body = ?, updated_at = NOW() WHERE id = ?", post.PostedBy, post.Title, post.Body, post.ID)
-	return err
-}
-
-func DeletePost(id string) error {
-	_, err := Db.Exec("DELETE FROM posts WHERE id = ?", id)
-	return err
-}
-
-func GetPostsByUser(userId string) ([]model.Post, error) {
-	rows, err := Db.Query("SELECT * FROM posts WHERE posted_by = ?", userId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []model.Post
-	for rows.Next() {
-		var post model.Post
-		if err := rows.Scan(&post.ID, &post.PostedBy, &post.Title, &post.Body, &post.CreatedAt, &post.UpdatedAt); err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-
-	return posts, nil
-}
-```
-
-No new features need to be implemented in the model package as the Post struct is already defined. Therefore, no changes are required in the existing code.
-
-../main.go
-```
-package main
+package controller
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
-	"main/controller"
-	"main/dao"
+	"main/model"
+	"main/usecase"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
-func main() {
-	dao.CloseDBWithSysCall()
+func logRequest(r *http.Request) {
+	log.Printf("Received request: %s %s", r.Method, r.URL)
+}
 
-	r := mux.NewRouter()
-	r.HandleFunc("/users", controller.GetUsers).Methods("GET")
-	r.HandleFunc("/users", controller.CreateUser).Methods("POST")
-	r.HandleFunc("/users/{userId}", controller.GetUser).Methods("GET")
-	r.HandleFunc("/users/{userId}", controller.UpdateUser).Methods("PUT")
-	r.HandleFunc("/users/{userId}", controller.DeleteUser).Methods("DELETE")
-	r.HandleFunc("/posts", controller.GetPosts).Methods("GET")
-	r.HandleFunc("/posts", controller.CreatePost).Methods("POST")
-	r.HandleFunc("/posts/{postId}", controller.GetPost).Methods("GET")
-	r.HandleFunc("/posts/{postId}", controller.UpdatePost).Methods("PUT")
-	r.HandleFunc("/posts/{postId}", controller.DeletePost).Methods("DELETE")
-	r.HandleFunc("/users/posts/{userId}", controller.GetPostsByUser).Methods("GET")
-
-	log.Printf("Listening...")
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
+	users, err := usecase.GetUsers()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), r); err != nil {
-		log.Fatal(err)
+	json.NewEncoder(w).Encode(users)
+}
+
+func GetUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
+	params := mux.Vars(r)
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
 	}
-}
 
-func init() {
-
-	if err := godotenv.Load(".env"); err != nil {
-		log.Printf("fail: godotenv.Load, %v\n", err)
+	user, err := usecase.GetUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	dao.OpenSql()
+	json.NewEncoder(w).Encode(user)
 }
 
-```
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
+	var user model.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-No new features need to be implemented in the schema package as the database schema for the posts table is already defined. Therefore, no changes are required in the existing code.
+	err = usecase.CreateUser(&user)
+	if err != nil {
+		if err.Error() == "Username already exists" {
+			http.Error(w, err.Error(), http.StatusConflict)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
 
-../usecase/posts.go
-```
-package usecase
-
-import (
-	"main/dao"
-	"main/model"
-)
-
-func GetPosts() ([]model.Post, error) {
-	return dao.GetPosts()
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(user)
 }
 
-func GetPost(id string) (model.Post, error) {
-	return dao.GetPost(id)
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
+	params := mux.Vars(r)
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	var user model.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user.ID = id
+	err = usecase.UpdateUser(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
 }
 
-func CreatePost(post *model.Post) error {
-	return dao.CreatePost(post)
-}
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
+	params := mux.Vars(r)
+	id := params["userId"]
+	if id == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
 
-func UpdatePost(post *model.Post) error {
-	return dao.UpdatePost(post)
-}
+	err := usecase.DeleteUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-func DeletePost(id string) error {
-	return dao.DeletePost(id)
+	w.WriteHeader(http.StatusNoContent)
 }
-
-func GetPostsByUser(userId string) ([]model.Post, error) {
-	return dao.GetPostsByUser(userId)
-}
-
 ```

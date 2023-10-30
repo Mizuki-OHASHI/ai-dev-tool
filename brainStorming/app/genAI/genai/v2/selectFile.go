@@ -1,10 +1,13 @@
 package v2
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 func selectFiles(direction string) error {
 	var err error
-	for _, filepath := range readFiles {
+	for _, filepath := range readFilesAll {
 		newMessages, err = makeMessagesToSelectFile(direction, filepath)
 		if err != nil {
 			return err
@@ -20,7 +23,10 @@ func selectFiles(direction string) error {
 		if selected {
 			selectedFiles = append(selectedFiles, filepath)
 			log.Printf("selected: %s", filepath)
+		} else {
+			log.Printf("not selected: %s", filepath)
 		}
+		time.Sleep(time.Second * 10)
 	}
 	return nil
 }

@@ -1,21 +1,8 @@
 1. controller package
-   - Implement a controller for handling post related requests. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Implement a controller for getting all posts by a specific user.
-
-2. dao package
-   - Implement a data access object (DAO) for interacting with the posts table in the database. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Implement a DAO method for getting all posts by a specific user.
-
-3. model package
-   - No new features need to be implemented in the model package as the Post struct is already defined.
-
-4. main package
-   - Add new routes for handling post related requests. This includes routes for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Add a new route for getting all posts by a specific user.
-
-5. schema package
-   - No new features need to be implemented in the schema package as the database schema for the posts table is already defined.
-
-6. usecase package
-   - Implement a use case for handling post related requests. This includes methods for getting all posts, getting a post by ID, creating a post, updating a post, and deleting a post.
-   - Implement a use case for getting all posts by a specific user.
+- Add logging functionality to record incoming requests in posts.go
+- Add logging functionality to record incoming requests in users.go
+- Ensure logs capture important request information such as method, URL, and possibly body content
+- Ensure logs are written in a consistent, readable format
+- Ensure logs are written to a location that can be easily accessed and monitored
+- Handle any errors that may occur during the logging process to prevent disruption of the main application flow
+- Test the logging functionality to ensure it works as expected

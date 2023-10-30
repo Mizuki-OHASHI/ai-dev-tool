@@ -1,1 +1,6 @@
-change code to distribute ID using google/uuid when creating a new user
+add feature: generate an user ID when creating a new user.
+add feature: preserve the uniqueness of the username when creating a new user.
+debug: error strings should not be capitalized
+add feature: get also user name when getting posts
+add feature: generate an post ID when creating a new post.
+change feature: require password when deleting a user.
