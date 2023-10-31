@@ -1,4 +1,4 @@
-package genai
+package v1
 
 import (
 	"fmt"

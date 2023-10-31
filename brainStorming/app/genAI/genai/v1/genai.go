@@ -1,4 +1,4 @@
-package genai
+package v1
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func makeMessagesListedFiles() error {
 func makeMessagesToBrainStorm() error {
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    "user",
-		Content: "List the features to be implemented for each package by comparing the definition of api and database with the existing code. ",
+		Content: "List the concrete features to be implemented for each package by comparing the definition of api and database with the existing code. ",
 	})
 
 	messages = append(messages, openai.ChatCompletionMessage{
