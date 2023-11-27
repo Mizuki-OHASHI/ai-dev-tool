@@ -1,0 +1,82 @@
+Certainly! Below are the test cases for the specified scenarios. Note that these test cases are written in a generic format; you may need to adjust them based on your application's specific details.
+
+```php
+namespace Tests\Unit\Http\Controllers\Web;
+
+use Tests\TestCase;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class RegisterControllerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function testNameIsRequired()
+    {
+        $response = $this->post('/register', [
+            'name' => '',  // Empty name
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors('name');
+    }
+
+    public function testValidateNameFailedWhenExceedingMaxlength()
+    {
+        $response = $this->post('/register', [
+            'name' => str_repeat('a', 256),  // Name exceeds maximum length
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors('name');
+    }
+
+    public function testValidateEmailFailedWhenEmailInvalid()
+    {
+        $response = $this->post('/register', [
+            'name' => 'John Doe',
+            'email' => 'invalid-email',  // Invalid email format
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+    }
+
+    public function testValidateEmailFailedWhenEmailExisted()
+    {
+        // Create a user with the same email
+        User::factory()->create(['email' => 'existing@example.com']);
+
+        $response = $this->post('/register', [
+            'name' => 'John Doe',
+            'email' => 'existing@example.com',  // Existing email
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+    }
+
+    // Add more test cases as needed for other scenarios
+
+    // Example test for successful registration
+    public function testSuccessfulRegistration()
+    {
+        $response = $this->post('/register', [
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertRedirect('/register/success');
+    }
+}
+```
+
+Ensure you adjust the test cases based on the routes and expected behaviors specific to your application. Additionally, you might need to customize the setup and teardown methods in the test class based on your application's needs.

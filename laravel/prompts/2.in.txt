@@ -1,0 +1,293 @@
+app/Http/Controllers/Web/RegisterController.php
+```php
+<?php
+
+namespace App\Http\Controllers\Web;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Web\RegisterRequest;
+use App\Services\Web\UserService;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserRegistered;
+use Illuminate\Http\Request;
+
+class RegisterController extends Controller
+{
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
+    /**
+     * Show register form
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function showFormRegister()
+    {
+        return view('auth.register');
+    }
+
+    public function showRegisterSuccess()
+    {
+        return view('auth.register_success');
+    }
+
+    public function register(RegisterRequest $request)
+    {
+        $inputs = $request->all(['name', 'email', 'password']);
+
+        $user = $this->userService->create($inputs);
+
+        Mail::to($user)->send(new UserRegistered($user->getKey(), $user->name));
+
+        return redirect()->action([static::class, 'showRegisterSuccess']);
+    }
+
+    public function verify(Request $request)
+    {
+        $user = $this->userService->findById($request->route('id'));
+        if (!$user) {
+            abort(404);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            $this->userService->verifyUser($user);
+        }
+
+        return view('auth.verify.message');
+    }
+
+    public function showFormVerification()
+    {
+        return view('auth.verify.resend');
+    }
+
+    public function resendVerificationLink(Request $request)
+    {
+        $user = $this->userService->findByEmail($request->input('email'));
+
+        if ($user && !$user->hasVerifiedEmail()) {
+            Mail::to($user)->send(new UserRegistered($user->getKey(), $user->name));
+        }
+
+        return redirect()->action([static::class, 'showFormVerification'])->with('resent', true);
+    }
+}
+```
+
+app/Http/Controllers/Controller.php
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+class Controller extends BaseController
+{
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+}
+```
+
+/app/Http/Requests/Web/RegisterRequest.php
+```php
+<?php
+
+namespace App\Http\Requests\Web;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Unique;
+
+class RegisterRequest extends FormRequest
+{
+    const NAME_MAX_LENGTH = 255;
+
+    const EMAIL_MAX_LENGTH = 255;
+
+    const PASSWORD_MIN_LENGTH = 8;
+
+    /**
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'name' => ['required', 'string', 'max:' . self::NAME_MAX_LENGTH],
+            'email' => ['required', 'string', 'email', 'max:' . self::EMAIL_MAX_LENGTH, new Unique('users', 'email')],
+            'password' => ['required', 'string', 'min:' . self::PASSWORD_MIN_LENGTH, 'confirmed'],
+        ];
+    }
+}
+```
+
+app/Mail/UserRegistered.php
+```php
+<?php
+
+namespace App\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\URL;
+
+class UserRegistered extends Mailable implements ShouldQueue
+{
+    use Queueable, SerializesModels;
+
+    protected $userId;
+
+    protected $userName;
+
+    public function __construct($userId, $userName)
+    {
+        $this->userId = $userId;
+        $this->userName = $userName;
+    }
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->markdown('emails.user.registered')
+            ->subject('Verify your account')
+            ->with([
+                'url' => $this->verificationUrl(),
+                'userName' => $this->userName,
+            ]);
+    }
+
+    private function verificationUrl()
+    {
+        return URL::temporarySignedRoute(
+            'web.register.verify',
+            now()->addMinutes(60),
+            ['id' => $this->userId]
+        );
+    }
+}
+```
+
+app/Services/Web/UserService.php
+```php
+<?php
+
+namespace App\Services\Web;
+
+use App\Models\User;
+
+class UserService
+{
+    public function create($inputs)
+    {
+        return User::create([
+            'name' => $inputs['name'],
+            'email' => $inputs['email'],
+            'password' => $inputs['password'],
+        ]);
+    }
+
+    public function findByEmail($email)
+    {
+        return User::where('email', '=', $email)->first();
+    }
+
+    public function findById($id)
+    {
+        return User::find($id);
+    }
+
+    public function verifyUser($user)
+    {
+        $user->email_verified_at = now();
+
+        return $user->save();
+    }
+}
+```
+
+app/Models/User.php
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public function setPasswordAttribute($value)
+    {
+        if ($value) {
+            $this->attributes['password'] = Hash::make($value);
+        }
+    }
+
+    public function hasVerifiedEmail()
+    {
+        return !is_null($this->email_verified_at);
+    }
+}
+```
+
+tests/Integration/Http/Controllers/Web/RegisterControllerTest.php
+```php
+<?php
+
+namespace Tests\Unit\Http\Requests\Web;
+
+class RegisterControllerTest extends TestCase
+{
+    ...
+}
+```
+
+1. generate test case for RegisterController/testNameIsRequired, testValidateNameFailedWhenExceedingMaxlength, testValidateEmailFailedWhenEmailInvalid, testValidateEmailFailedWhenEmailExisted
+# format
+<input> => <expected output>
+
+2. modify RegisterControllerTest.php to test RegisterController
