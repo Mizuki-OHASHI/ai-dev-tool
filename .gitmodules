@@ -1,0 +1,3 @@
+[submodule "laravel/laravel/laravel-test-example"]
+	path = laravel/laravel/laravel-test-example
+	url = git@github.com:tuanpht/laravel-test-example.git

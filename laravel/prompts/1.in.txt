@@ -1,0 +1,63 @@
+app/Sand/Book.php
+```
+<?php
+namespace App\Sand;
+
+class Book
+{
+    public $collectionNumber;
+    public $borrowedNumber;
+    public $bookedNumber;
+
+    public function __construct()
+    {
+        print('<p>executed Book class constructor</p>');
+    }
+
+    public function setCollectionNumber(int $collectionNumber)
+    {
+        $this->collectionNumber = $collectionNumber;
+    }
+
+    public function setBorrowedNumber(int $borrowedNumber)
+    {
+        $this->borrowedNumber = $borrowedNumber;
+    }
+
+    public function setBookedNumber(int $bookedNumber)
+    {
+        $this->bookedNumber = $bookedNumber;
+    }
+
+    public function getAvailableNumber()
+    {
+        return $this->collectionNumber - $this->borrowedNumber - $this->bookedNumber;
+    }
+}
+```
+
+tests/Unit/BookTest.php
+```
+<?php
+
+namespace Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+
+class BookTest extends TestCase
+{
+    /**
+     * A basic unit test example.
+     */
+    public function test_example(): void
+    {
+        $this->assertTrue(true);
+    }
+}
+```
+
+1. generate test case for function getAvailableNumber()
+# format
+<input> => <expected output>
+
+2. modify BookTest.php to test function getAvailableNumber()
